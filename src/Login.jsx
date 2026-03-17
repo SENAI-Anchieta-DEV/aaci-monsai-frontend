@@ -1,12 +1,7 @@
 import { useState } from "react";
+import axios from 'axios';                      // faltava
 import logo from "./assets/Logo_nome.png";
-import {
-  Box,
-  Button,
-  TextField,
-  Typography,
-  Paper,
-} from "@mui/material";
+import { Box, Button, TextField, Typography, Paper } from "@mui/material";
 
 const roles = [
   { id: "administrador", label: "Administrador" },
@@ -31,35 +26,42 @@ function PersonIcon({ color = "#2d5a27" }) {
   );
 }
 
-const handleLogin = async () => {
-  try {
-    // 1. Chama o endpoint do seu AuthControllerconst 
-      response = await axios.post('http://localhost:8080/auth/login', {
-      email: credential, // Campo que você mapeou no seu DTOsenha: password
-    });
-    // 2. O backend retorna o objeto LoginResponseDTO contendo o tokenconst { token } = response.data; 
 
-    // 3. Salva no localStorage para manter a sessãolocalStorage.setItem('token', token);
 
-    // 4. Configura o padrão do Axios para enviar o token em todas as chamadas    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-    alert("Login realizado com sucesso!");
-    // Redirecione para a tela principal, ex: navigate('/painel');
-    
-  } catch (error) {
-    console.error("Erro de autenticação:", error);
-    alert("Falha no login: verifique suas credenciais.");
-  }
-};
-
-export default function MonsaiLogin() {
+export default function MonsaiLogin({onLogin}) {
   const [selectedRole, setSelectedRole] = useState("gestor");
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleLogin = async () => {
+  try {
+    // 1. Chama o endpoint de autenticação
+    const response = await axios.post('http://localhost:8080/auth/login', {
+      email: credential,
+      senha: password
+    });
+
+    // 2. Pega o token do retorno
+    const { token } = response.data;
+
+    // 3. Salva no localStorage
+    localStorage.setItem('token', token);
+
+    // 4. Configura o Axios para enviar o token em todas as chamadas
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    // 5. Avisa o App.js que o login foi bem sucedido
+    onLogin();
+
+  } catch (error) {
+    console.error("Erro de autenticação:", error);
+    alert("Falha no login: verifique suas credenciais.");
+  }
+
   const handleLogin = () => {
     alert(`Login como: ${selectedRole}`);
   };
+};
 
   return (
     <Box
