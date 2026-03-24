@@ -57,21 +57,19 @@ export default function Login({ onLogin, onVoltar }) {
     if (link === "Voltar ao Home" && onVoltar) onVoltar();
   };
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post("http://localhost:8080/auth/login", {
-        email: credential,
-        senha: password,
-      });
-      const { token } = response.data;
-      localStorage.setItem("token", token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      onLogin();
-    } catch (error) {
-      console.error("Erro de autenticação:", error);
-      alert("Falha no login: verifique suas credenciais.");
-    }
-  };
+const handleLogin = async () => {
+  try {
+    const response = await axios.post("http://localhost:8080/auth/login", {
+      email: credential,
+      senha: password,
+    });
+    onLogin(response.data); 
+
+  } catch (error) {
+    console.error("Erro de autenticação:", error);
+    alert("Falha no login: verifique suas credenciais.");
+  }
+};
 
   return (
     <ThemeProvider theme={theme}>
