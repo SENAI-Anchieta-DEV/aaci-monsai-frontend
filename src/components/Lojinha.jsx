@@ -25,7 +25,7 @@ const theme = createTheme({
 
 const navLinks = ["Voltar ao Home", "Sou Cliente", "Sobre nós", "Contato"];
 
-export default function Lojinha({ onVoltar, onLogin }) {
+export default function Lojinha({ onVoltar, onLogin, onComprar }) {
   const [qty, setQty]               = useState(1);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -109,6 +109,7 @@ export default function Lojinha({ onVoltar, onLogin }) {
               </Typography>
 
               <Button variant="contained" color="secondary"
+                onClick={() => onComprar && onComprar(qty)}
                 sx={{ px: 5, py: 1, fontSize: "1rem", "&:hover": { bgcolor: "primary.main" } }}>
                 Comprar
               </Button>

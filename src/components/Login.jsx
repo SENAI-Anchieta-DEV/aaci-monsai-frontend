@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import logo from "../assets/Logo_nome.png";
+import { useToast } from "./ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
@@ -45,12 +46,13 @@ function PersonIcon({ active }) {
   );
 }
 
-export default function Login({ onLogin, onVoltar }) {
+export default function Login({ onLogin, onVoltar, onRecuperar }) {
   const [selectedRole, setSelectedRole] = useState("gestor");
   const [credential, setCredential]     = useState("");
   const [password, setPassword]         = useState("");
   const [drawerOpen, setDrawerOpen]     = useState(false);
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const showToast = useToast();
 
   const handleNav = (link) => {
     setDrawerOpen(false);
@@ -66,10 +68,21 @@ export default function Login({ onLogin, onVoltar }) {
       const { token } = response.data;
       localStorage.setItem("token", token);
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      showToast({
+        type: "success",
+        title: "Conteúdo Acessado!",
+        message: "Login bem-sucedido.",
+      });
+
       onLogin();
     } catch (error) {
       console.error("Erro de autenticação:", error);
-      alert("Falha no login: verifique suas credenciais.");
+      showToast({
+        type: "error",
+        title: "Falha no login!",
+        message: "O Email ou Senha inseridos estão incorretos.",
+      });
     }
   };
 
@@ -78,7 +91,7 @@ export default function Login({ onLogin, onVoltar }) {
       <Box sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: "flex",
         flexDirection: "column" }}>
 
-        {/* ── NAVBAR (padrão Home) ── */}
+        {/* ── NAVBAR ── */}
         <AppBar position="sticky" sx={{ bgcolor: "#AED696", boxShadow: "none" }}>
           <Toolbar sx={{ px: { xs: 2, md: 5 }, justifyContent: "space-between" }}>
             <Box component="img" src={logo} alt="MONSAI" sx={{ height: 40, objectFit: "contain" }} />
@@ -202,8 +215,11 @@ export default function Login({ onLogin, onVoltar }) {
                   }}>
                   Entrar
                 </Button>
-                <Typography sx={{ color: "#1a3a16", fontSize: "0.82rem", cursor: "pointer",
-                  textDecoration: "underline", opacity: 0.8, "&:hover": { opacity: 1 } }}>
+                <Typography 
+                onClick={onRecuperar}
+                sx={{ color: "#1a3a16", fontSize: "0.82rem", cursor: "pointer",
+                  textDecoration: "underline", opacity: 0.8,
+                   "&:hover": { opacity: 1 } }}>
                   Recuperar senha?
                 </Typography>
               </Box>
