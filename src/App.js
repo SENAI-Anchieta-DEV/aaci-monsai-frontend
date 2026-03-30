@@ -58,7 +58,7 @@ function App() {
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
-        return <AdminSetup onLogout={handleLogout} />;
+        return <AdminSetup onFinish={handleLogout} onLogout={handleLogout} />;
       case SCREENS.DASHBOARD:
         return <Dashboard perfil={auth.perfil} onLogout={handleLogout} />;
       case SCREENS.LOJINHA:
