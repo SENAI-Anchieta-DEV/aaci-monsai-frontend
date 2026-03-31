@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Paper, Grid, Alert, CircularProgress } from '@mui/material';
 
 export default function CadastrarIdoso({ gestorAsiloId }) {
@@ -7,8 +7,14 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
     cpf: '',
     email: '',
     serialDispositivo: '',
-    asiloId: gestorAsiloId || 1 
+    asiloId: gestorAsiloId
   });
+
+  useEffect(() => {
+    if (gestorAsiloId) {
+      setFormData(prev => ({ ...prev, asiloId: gestorAsiloId }));
+    }
+  }, [gestorAsiloId]);
 
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
 

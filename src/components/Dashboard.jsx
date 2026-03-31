@@ -16,8 +16,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 // Importando a tela de monitoramento que criaremos abaixo
 import Monitoramento from './Monitoramento';
-import CadastrarUsuario from './CadastrarUsuario'; // Tela nova que criaremos
+import CadastrarUsuario from './CadastrarUsuario';
 import CadastrarIdoso from './CadastrarIdoso';
+import GerenciarUsuarios from './GerenciarUsuarios';
 
 export default function Dashboard({ perfil, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -39,11 +40,15 @@ export default function Dashboard({ perfil, onLogout }) {
 
   const renderizarTela = () => {
     switch (telaAtiva) {
-      case 'monitoramento': return <Monitoramento />;
-      case 'cadastrar': return <CadastrarUsuario />; 
-      case 'cadastrar_idoso': return <CadastrarIdoso />;
-      default: return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Em construção...</Typography>;
-    }
+    case 'monitoramento': return <Monitoramento />;
+    case 'cadastrar_idoso': return <CadastrarIdoso gestorAsiloId={asiloId} />;
+   case 'cadastrar': 
+  return <CadastrarUsuario asiloId={asiloId} />; 
+  case 'pesquisar': 
+  case 'remover': 
+  return <GerenciarUsuarios asiloId={asiloId} />;
+    default: return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Selecione uma opção</Typography>;
+  }
   };
 
   return (

@@ -13,6 +13,10 @@ export default function Monitoramento() {
   const [idosos, setIdosos] = useState([]);
   const [termoPesquisa, setTermoPesquisa] = useState("");
   const [telemetria, setTelemetria] = useState({});
+  const [openModal, setOpenModal] = useState(false);
+  const [idosoEditando, setIdosoEditando] = useState(null);
+
+  
 
   const fetchIdosos = async () => {
     try {
@@ -80,6 +84,24 @@ const idososFiltrados = idosos.filter(idoso =>
 
   const handleEdit = (id) => {
     alert(`Abrir modal de edição para o Idoso ID: ${id}`);
+    setIdosoEditando({ ...idoso });
+    setOpenModal(true);
+  };
+
+  const salvarEdicao = async () => {
+    try {
+      await axios.put(`http://localhost:8080/idosos/${idosoEditando.id}`, {
+        nome: idosoEditando.nome,
+        cpf: idosoEditando.cpf,
+        email: idosoEditando.email,
+        serialDispositivo: idosoEditando.dispositivo?.serial // Mantém o vínculo
+      });
+      alert("Dados atualizados!");
+      setOpenModal(false);
+      fetchIdosos(); // Recarrega os cards
+    } catch (err) {
+      alert("Erro ao atualizar idoso.");
+    }
   };
 
   return (
@@ -223,6 +245,32 @@ const idososFiltrados = idosos.filter(idoso =>
         </Typography>
       </Box>
     )}
+
+    {/* MODAL DE EDIÇÃO */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Box sx={{ 
+          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+          width: 400, bgcolor: 'white', borderRadius: 4, p: 4, boxShadow: 24 
+        }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Editar Idoso</Typography>
+          
+          <MuiTextField 
+            fullWidth label="Nome" sx={{ mb: 2 }}
+            value={idosoEditando?.nome || ""} 
+            onChange={(e) => setIdosoEditando({...idosoEditando, nome: e.target.value})}
+          />
+          <MuiTextField 
+            fullWidth label="Email do Familiar" sx={{ mb: 2 }}
+            value={idosoEditando?.email || ""} 
+            onChange={(e) => setIdosoEditando({...idosoEditando, email: e.target.value})}
+          />
+          
+          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+            <Button fullWidth variant="outlined" onClick={() => setOpenModal(false)}>Cancelar</Button>
+            <Button fullWidth variant="contained" sx={{ bgcolor: '#2d5a27' }} onClick={salvarEdicao}>Salvar</Button>
+          </Box>
+        </Box>
+      </Modal>
   </Box>
 );
 }
