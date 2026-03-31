@@ -11,16 +11,14 @@ import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ElderlyIcon from '@mui/icons-material/Elderly';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SettingsIcon from '@mui/icons-material/Settings';
 
 // Importando a tela de monitoramento que criaremos abaixo
 import Monitoramento from './Monitoramento';
 import CadastrarUsuario from './CadastrarUsuario';
 import CadastrarIdoso from './CadastrarIdoso';
-import GerenciarUsuarios from './GerenciarUsuarios';
 
-export default function Dashboard({ perfil, onLogout }) {
+
+export default function Dashboard({ perfil, asiloId, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [telaAtiva, setTelaAtiva] = useState('monitoramento'); // Começa sempre nos cards
 
@@ -44,9 +42,7 @@ export default function Dashboard({ perfil, onLogout }) {
     case 'cadastrar_idoso': return <CadastrarIdoso gestorAsiloId={asiloId} />;
    case 'cadastrar': 
   return <CadastrarUsuario asiloId={asiloId} />; 
-  case 'pesquisar': 
-  case 'remover': 
-  return <GerenciarUsuarios asiloId={asiloId} />;
+  
     default: return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Selecione uma opção</Typography>;
   }
   };

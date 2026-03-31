@@ -46,9 +46,12 @@ useEffect(() => {
 
   // 3. Handlers de Ação
   const handleLoginSuccess = (dados) => {
+  console.log('Dados recebidos do backend:', dados); // Verifique o nome do campo!
+  
   localStorage.setItem('token', dados.token);
   localStorage.setItem('tipoPerfil', dados.tipoPerfil);
-  localStorage.setItem('asiloId', dados.asiloId); // <--- Salva o ID real vindo do Java
+  localStorage.setItem('asiloId', dados.asiloId);
+  
   applyAuth(dados.token, dados.tipoPerfil, dados.asiloId);
 };
 

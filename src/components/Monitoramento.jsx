@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Modal, TextField as MuiTextField, Button } from "@mui/material";
 import { 
   Grid, Card, CardContent, Typography, Box, IconButton, Chip, TextField
 } from '@mui/material';
@@ -84,7 +85,9 @@ const idososFiltrados = idosos.filter(idoso =>
 
   const handleEdit = (id) => {
     alert(`Abrir modal de edição para o Idoso ID: ${id}`);
-    setIdosoEditando({ ...idoso });
+    // Encontra o idoso específico na lista baseando-se no ID
+    const idosoSelecionado = idosos.find(i => i.id === id); 
+    setIdosoEditando({ ...idosoSelecionado });
     setOpenModal(true);
   };
 

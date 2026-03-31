@@ -14,6 +14,7 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     tipoUsuario: 'CUIDADOR',
   });
 
+  console.log('asiloId recebido:', asiloId, typeof asiloId);
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
   const tipos = ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'];
 
@@ -26,8 +27,12 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: false });
 
-    // Montamos o objeto final incluindo o asiloId que veio do Dashboard
-    const payload = { ...formData, asiloId: parseInt(asiloId) };
+    const idAsilo = Number(asiloId);
+if (!idAsilo) {
+  setStatus({ loading: false, error: 'ID do asilo inválido. Faça login novamente.', success: false });
+  return;
+}
+const payload = { ...formData, asiloId: idAsilo };
 
     try {
       await axios.post('http://localhost:8080/usuarios', payload);
