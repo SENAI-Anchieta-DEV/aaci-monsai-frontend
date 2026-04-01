@@ -6,16 +6,17 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SearchIcon from '@mui/icons-material/Search';
-import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ElderlyIcon from '@mui/icons-material/Elderly';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 // Importando a tela de monitoramento que criaremos abaixo
 import Monitoramento from './Monitoramento';
 import CadastrarUsuario from './CadastrarUsuario';
 import CadastrarIdoso from './CadastrarIdoso';
+import GerenciarUsuarios from './GerenciarUsuarios';
 
 
 export default function Dashboard({ perfil, asiloId, onLogout }) {
@@ -24,11 +25,11 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
 
   const menuItems = [
     { id: 'monitoramento', label: 'Monitoramento', icon: <MonitorHeartIcon /> },
-    { id: 'pesquisar', label: 'Pesquisar Usuário', icon: <SearchIcon /> },
     { id: 'cadastrar', label: 'Cadastrar Usuário', icon: <PersonAddIcon /> },
-    { id: 'remover', label: 'Remover Usuário', icon: <PersonRemoveIcon /> },
+    { id: 'gerenciar', label: 'Gerenciar Usuários', icon: <ManageAccountsIcon /> },
     { id: 'cadastrar_idoso', label: 'Cadastrar Idoso', icon: <ElderlyIcon /> },
     { id: 'localizar', label: 'Localizar Idoso', icon: <LocationOnIcon /> },
+    { id: 'historico_alertas', label: 'Histórico de Alertas', icon: <ReportProblemIcon />}
   ];
 
   const handleNavegar = (idTela) => {
@@ -40,8 +41,10 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
     switch (telaAtiva) {
     case 'monitoramento': return <Monitoramento />;
     case 'cadastrar_idoso': return <CadastrarIdoso gestorAsiloId={asiloId} />;
-   case 'cadastrar': 
-  return <CadastrarUsuario asiloId={asiloId} />; 
+    case 'cadastrar': 
+      return <CadastrarUsuario asiloId={asiloId} />; 
+    case 'gerenciar': 
+      return <GerenciarUsuarios asiloId={asiloId} />;
   
     default: return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Selecione uma opção</Typography>;
   }

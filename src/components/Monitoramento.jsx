@@ -11,14 +11,14 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 
 export default function Monitoramento() {
+  // Inicializo os estados globais da tela de monitoramento
   const [idosos, setIdosos] = useState([]);
   const [termoPesquisa, setTermoPesquisa] = useState("");
   const [telemetria, setTelemetria] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [idosoEditando, setIdosoEditando] = useState(null);
 
-  
-
+  // Busco a lista completa de idosos na API
   const fetchIdosos = async () => {
     try {
       const response = await axios.get("http://localhost:8080/idosos");
@@ -28,10 +28,12 @@ export default function Monitoramento() {
     }
   };
 
+  // Executo a primeira busca de idosos ao montar o componente
   useEffect(() => {
     fetchIdosos();
   }, []);
 
+  // Crio um intervalo para buscar a telemetria a cada 3 segundos
   useEffect(() => {
     if (idosos.length === 0) return;
 
@@ -54,56 +56,63 @@ export default function Monitoramento() {
           };
         }
         setTelemetria(dadosNovos);
+        
       } catch (err) {
         console.error("Erro ao buscar telemetria:", err);
       }
     }, 3000);
 
+    // Limpo o intervalo quando o componente for desmontado para evitar memory leak
     return () => clearInterval(interval);
   }, [idosos, telemetria]);
 
-  // LÓGICA DE FILTRO: Filtra a lista original baseada no que foi digitado
- // Filtra apenas os ATIVOS e que batem com o termo de pesquisa
-const idososFiltrados = idosos.filter(idoso => 
-  idoso.ativo && (
-    idoso.nome?.toLowerCase().includes(termoPesquisa.toLowerCase()) ||
-    idoso.dispositivo?.serial?.toLowerCase().includes(termoPesquisa.toLowerCase())
-  )
-);
+  // Filtro os idosos ativos aplicando a regra de texto da barra de pesquisa
+  const idososFiltrados = idosos.filter(idoso => 
+    idoso.ativo && (
+      idoso.nome?.toLowerCase().includes(termoPesquisa.toLowerCase()) ||
+      idoso.dispositivo?.serial?.toLowerCase().includes(termoPesquisa.toLowerCase())
+    )
+  );
 
+  // Processo a exclusão lógica do idoso
   const handleDelete = async (id, nome) => {
     if (window.confirm(`ATENÇÃO: Deseja inativar o idoso ${nome}?`)) {
       try {
         await axios.delete(`http://localhost:8080/idosos/${id}`);
         alert("Idoso inativado com sucesso!");
-        fetchIdosos();
+        fetchIdosos(); // Recarrego os dados para atualizar a tela
       } catch (error) {
-        alert("Erro ao inativar idoso.");
+        const msgErro = error.response?.data?.detail || error.response?.data?.message || "Erro interno.";
+        alert("Erro ao inativar idoso: " + msgErro);
       }
     }
   };
 
+  // Preparo os dados do idoso selecionado para o modal de edição
   const handleEdit = (id) => {
-    alert(`Abrir modal de edição para o Idoso ID: ${id}`);
-    // Encontra o idoso específico na lista baseando-se no ID
+    // Localizo o idoso específico diretamente na lista já carregada
     const idosoSelecionado = idosos.find(i => i.id === id); 
     setIdosoEditando({ ...idosoSelecionado });
     setOpenModal(true);
   };
 
+  // Submeto as atualizações do idoso para a API
   const salvarEdicao = async () => {
     try {
       await axios.put(`http://localhost:8080/idosos/${idosoEditando.id}`, {
         nome: idosoEditando.nome,
         cpf: idosoEditando.cpf,
         email: idosoEditando.email,
-        serialDispositivo: idosoEditando.dispositivo?.serial // Mantém o vínculo
+        serialDispositivo: idosoEditando.dispositivo?.serial // Garanto a manutenção do vínculo atual
       });
+      
       alert("Dados atualizados!");
       setOpenModal(false);
-      fetchIdosos(); // Recarrega os cards
+      fetchIdosos(); 
+      
     } catch (err) {
-      alert("Erro ao atualizar idoso.");
+      const msgErro = err.response?.data?.detail || err.response?.data?.message || "Erro interno.";
+      alert("Erro ao atualizar idoso: " + msgErro);
     }
   };
 

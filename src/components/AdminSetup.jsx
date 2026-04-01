@@ -5,10 +5,11 @@ import {
   TextField, Paper, Container, Divider 
 } from "@mui/material";
 
-// Sub-componente do Passo 2
-const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
+export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
+  // Inicializo o estado do formulário para o perfil GESTOR
   const [gestor, setGestor] = useState({ nome: '', email: '', senha: '', cpf: '' });
 
+  // Submeto os dados para configuração final do asilo
   const handleSubmit = async () => {
     try {
       await axios.post("http://localhost:8080/usuarios", {
@@ -19,19 +20,18 @@ const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
       
       alert("Configuração finalizada com sucesso! Faça Login novamente.");
       
-      // Chamando a função correta que vem do pai
+      // Chamo a função onFinish se ela foi injetada pelo pai
       if (onFinish) onFinish(); 
 
     } catch (error) {
-      // Log detalhado no console para o desenvolvedor
       console.error("Erro na requisição:", error.response?.data || error.message);
       
-      // Se o erro veio do Java (400, 409, etc)
+      // Verifico se o erro é uma resposta válida da API (Ex: DataIntegrityViolationException)
       if (error.response) {
-        const mensagem = error.response.data.message || "Verifique se CPF ou Email já estão cadastrados.";
+        const mensagem = error.response.data.detail || error.response.data.message || "Verifique se CPF ou Email já estão cadastrados.";
         alert(mensagem);
       } else {
-        // Se for um erro de código no React
+        // Trato falhas de rede ou interrupções abruptas
         alert("Erro interno no sistema. Verifique o console.");
       }
     }

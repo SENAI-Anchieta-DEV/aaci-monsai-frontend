@@ -24,6 +24,7 @@ const theme = createTheme({
   },
 });
 
+// Defino as opções de navegação e os perfis do sistema
 const navLinks = ["Voltar ao Home", "Sobre nós", "Contato"];
 
 const roles = [
@@ -34,42 +35,73 @@ const roles = [
   { id: "familiar",      label: "Familiar" },
 ];
 
+// Desenho o ícone dinâmico do usuário
 function PersonIcon({ active }) {
   const color = active ? "#fff" : "#2d5a27";
   return (
     <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
       <circle cx="18" cy="11" r="6" fill={color} />
-      <path d="M6 32c0-6.627 5.373-12 12-12s12 5.373 12 12"
-        stroke={color} strokeWidth="3" strokeLinecap="round" fill="none" />
+      <path d="M6 32c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke={color} strokeWidth="3" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
 export default function Login({ onLogin, onVoltar }) {
+  // Inicializo as credenciais e as configurações de tela
   const [selectedRole, setSelectedRole] = useState("gestor");
   const [credential, setCredential]     = useState("");
   const [password, setPassword]         = useState("");
   const [drawerOpen, setDrawerOpen]     = useState(false);
+  
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+  // Gerencio a navegação do menu lateral
   const handleNav = (link) => {
     setDrawerOpen(false);
     if (link === "Voltar ao Home" && onVoltar) onVoltar();
   };
 
-const handleLogin = async () => {
-  try {
-    const response = await axios.post("http://localhost:8080/auth/login", {
-      email: credential,
-      senha: password,
-    });
-    onLogin(response.data); 
+  // Processo a tentativa de autenticação
+  const handleLogin = async () => {
+    try {
+      // 1. Executo a autenticação inicial com e-mail e senha
+      const response = await axios.post("http://localhost:8080/auth/login", {
+        email: credential,
+        senha: password,
+      });
 
-  } catch (error) {
-    console.error("Erro de autenticação:", error);
-    alert("Falha no login: verifique suas credenciais.");
-  }
-};
+      const { token, tipoPerfil } = response.data;
+
+      // 2. Busco os dados completos da lista de usuários usando o token obtido
+      const userDetailsRes = await axios.get("http://localhost:8080/usuarios", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      // 3. Filtro o usuário específico que acabou de logar
+      const usuarioLogado = userDetailsRes.data.find(
+        (u) => u.email.toLowerCase() === credential.toLowerCase()
+      );
+
+      if (usuarioLogado) {
+        // Monto o pacote consolidado de informações e envio para o App.js
+        const pacoteCompleto = {
+          token: token,
+          tipoPerfil: tipoPerfil,
+          asiloId: usuarioLogado.asilo?.id
+        };
+        onLogin(pacoteCompleto); 
+      } else {
+        alert("Erro ao recuperar perfil do usuário.");
+      }
+
+    } catch (error) {
+      console.error("Erro de autenticação:", error);
+      
+      // Capturo explicitamente o BadCredentialsException (401) do backend
+      const msg = error.response?.data?.detail || error.response?.data?.message || "Verifique suas credenciais.";
+      alert("Falha no login: " + msg);
+    }
+  };
 
   return (
     <ThemeProvider theme={theme}>
