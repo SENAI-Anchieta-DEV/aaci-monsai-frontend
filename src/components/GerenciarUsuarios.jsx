@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VpnKeyIcon from '@mui/icons-material/VpnKey'; // Ícone de chave para redefinir senha
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 
 export default function GerenciarUsuarios({ asiloId }) {
   // Inicializo as listas e os estados de controle da tela
@@ -22,6 +23,21 @@ export default function GerenciarUsuarios({ asiloId }) {
   // Recupero o token de autenticação e configuro o cabeçalho padrão
   const token = localStorage.getItem('token');
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+
+  const [modalVinculoAberto, setModalVinculoAberto] = useState(false);
+  const [listaIdosos, setListaIdosos] = useState([]);
+  const [idosoSelecionado, setIdosoSelecionado] = useState('');
+
+  // Função para carregar idosos do asilo - PARA OS FAMILIARES
+const carregarIdosos = async () => {
+  try {
+    const res = await axios.get('http://localhost:8080/idosos', authHeaders);
+    // Filtra idosos que pertencem ao asilo
+    setListaIdosos(res.data);
+  } catch (err) {
+    console.error("Erro ao carregar idosos", err);
+  }
+};
 
   // ==========================================
   // 1. LISTAR USUÁRIOS
@@ -49,6 +65,7 @@ export default function GerenciarUsuarios({ asiloId }) {
 
   useEffect(() => {
     carregarUsuarios();
+    carregarIdosos();
   }, [carregarUsuarios]);
 
   // ==========================================
@@ -85,6 +102,22 @@ export default function GerenciarUsuarios({ asiloId }) {
     setModalAberto(true);
   };
 
+   // ==========================================
+  // 4. VINCULAR E DESVINCULAR IDOSO DE FAMILIAR
+  // ==========================================
+  // Função para vincular (chama seu endpoint POST /{idUsuario}/idosos/{idIdoso})
+const handleVincular = async () => {
+  try {
+    const idUsuario = usuarioSelecionado.id || usuarioSelecionado.usuarioId;
+    await axios.post(`http://localhost:8080/usuarios/${idUsuario}/idosos/${idosoSelecionado}`, {}, authHeaders);
+    alert("Idoso vinculado com sucesso!");
+    setModalVinculoAberto(false);
+    carregarUsuarios(); // Recarrega a lista para mostrar o idoso vinculado
+  } catch (err) {
+    alert("Erro ao vincular: " + (err.response?.data?.detail || "Erro desconhecido"));
+  }
+};
+
   // Valido e envio a nova senha para o servidor
   const handleSalvarSenha = async () => {
     if (novaSenha.length < 6) {
@@ -120,7 +153,6 @@ export default function GerenciarUsuarios({ asiloId }) {
         Gerenciar Colaboradores
       </Typography>
 
-      {/* Feedbacks na tela */}
       {status.success && <Alert severity="success" sx={{ mb: 2 }}>{status.success}</Alert>}
       {status.error && <Alert severity="error" sx={{ mb: 2 }}>{status.error}</Alert>}
 
@@ -144,12 +176,11 @@ export default function GerenciarUsuarios({ asiloId }) {
                 {usuarios.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>
-                      Nenhum colaborador ativo encontrado para este asilo.
+                      Nenhum colaborador ativo encontrado.
                     </TableCell>
                   </TableRow>
                 ) : (
                   usuarios.map((usuario) => (
-                    // O backend pode retornar "id" ou "usuarioId", garantimos o uso do correto
                     <TableRow key={usuario.id || usuario.usuarioId} hover>
                       <TableCell>{usuario.nome}</TableCell>
                       <TableCell>{usuario.email}</TableCell>
@@ -161,14 +192,26 @@ export default function GerenciarUsuarios({ asiloId }) {
                         />
                       </TableCell>
                       <TableCell align="center">
-                        {/* Botão de Editar Senha */}
                         <Tooltip title="Alterar Senha">
                           <IconButton onClick={() => abrirModalSenha(usuario)} sx={{ color: '#2d5a27' }}>
                             <VpnKeyIcon />
                           </IconButton>
                         </Tooltip>
+
+                        {(usuario.tipo === 'FAMILIAR' || usuario.tipoUsuario === 'FAMILIAR') && (
+                          <Tooltip title="Vincular Idoso">
+                            <IconButton 
+                              onClick={() => {
+                                setUsuarioSelecionado(usuario);
+                                setModalVinculoAberto(true);
+                              }} 
+                              sx={{ color: '#1a3d0a' }}
+                            >
+                              <PersonAddAltIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
                         
-                        {/* Botão de Excluir/Inativar */}
                         <Tooltip title="Remover Acesso">
                           <IconButton 
                             onClick={() => handleInativar(usuario.id || usuario.usuarioId, usuario.nome)} 
@@ -187,30 +230,54 @@ export default function GerenciarUsuarios({ asiloId }) {
         )}
       </Paper>
 
-      {/* MODAL DE EDIÇÃO DE SENHA */}
+      {/* MODAL DE SENHA */}
       <Dialog open={modalAberto} onClose={() => setModalAberto(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>
-          Redefinir Senha
-        </DialogTitle>
+        <DialogTitle sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>Redefinir Senha</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Digite a nova senha de acesso para <b>{usuarioSelecionado?.nome}</b>.
+            Nova senha para <b>{usuarioSelecionado?.nome}</b>.
           </Typography>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Nova Senha"
-            type="password"
-            fullWidth
-            variant="outlined"
-            value={novaSenha}
-            onChange={(e) => setNovaSenha(e.target.value)}
+            autoFocus margin="dense" label="Nova Senha" type="password" fullWidth variant="outlined"
+            value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)}
           />
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setModalAberto(false)} sx={{ color: 'text.secondary' }}>Cancelar</Button>
-          <Button onClick={handleSalvarSenha} variant="contained" sx={{ bgcolor: '#2d5a27', '&:hover': { bgcolor: '#1a3d0a' } }}>
-            Salvar Senha
+          <Button onClick={() => setModalAberto(false)}>Cancelar</Button>
+          <Button onClick={handleSalvarSenha} variant="contained" sx={{ bgcolor: '#2d5a27' }}>Salvar</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* NOVO: MODAL DE VÍNCULO (O QUE ESTAVA FALTANDO) */}
+      <Dialog open={modalVinculoAberto} onClose={() => setModalVinculoAberto(false)} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>Vincular Idoso</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Selecione o idoso para <b>{usuarioSelecionado?.nome}</b>:
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="Idoso"
+            value={idosoSelecionado}
+            onChange={(e) => setIdosoSelecionado(e.target.value)}
+            SelectProps={{ native: true }}
+          >
+            <option value=""></option>
+            {listaIdosos.map((i) => (
+              <option key={i.id} value={i.id}>{i.nome}</option>
+            ))}
+          </TextField>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setModalVinculoAberto(false)}>Cancelar</Button>
+          <Button 
+            onClick={handleVincular} 
+            variant="contained" 
+            disabled={!idosoSelecionado}
+            sx={{ bgcolor: '#2d5a27' }}
+          >
+            Vincular
           </Button>
         </DialogActions>
       </Dialog>

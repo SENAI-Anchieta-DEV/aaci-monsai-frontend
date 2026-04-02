@@ -87,9 +87,14 @@ export default function Login({ onLogin, onVoltar }) {
         const pacoteCompleto = {
           token: token,
           tipoPerfil: tipoPerfil,
-          asiloId: usuarioLogado.asilo?.id
+          asiloId: usuarioLogado.asilo?.id,
+          usuarioId: usuarioLogado.id,
+          nome: usuarioLogado.nome,
+          email: usuarioLogado.email, // <--- GARANTA QUE ISSO EXISTE NO JSON
+          cpf: usuarioLogado.cpf,
         };
-        onLogin(pacoteCompleto); 
+        console.log("Pacote enviado para o App:", pacoteCompleto);
+        onLogin(pacoteCompleto);
       } else {
         alert("Erro ao recuperar perfil do usuário.");
       }

@@ -41,6 +41,7 @@ function App() {
     const perfil = localStorage.getItem('tipoPerfil');
     const asiloId = localStorage.getItem('asiloId'); 
     
+    
     if (token && perfil) {
       applyAuth(token, perfil, asiloId);
     }
@@ -48,17 +49,19 @@ function App() {
 
   // 3. Processo e persisto os dados recebidos após um login bem-sucedido
   const handleLoginSuccess = (dados) => {
-    console.log('Dados recebidos do backend:', dados);
-    
-    // Padronizo a leitura do ID do asilo caso venha em formatos diferentes da API
-    const asiloIdReal = dados.asilo?.id || dados.asiloId; 
-
-    localStorage.setItem('token', dados.token);
-    localStorage.setItem('tipoPerfil', dados.tipoPerfil);
-    localStorage.setItem('asiloId', asiloIdReal); 
-    
-    applyAuth(dados.token, dados.tipoPerfil, asiloIdReal);
-  };
+  localStorage.setItem('token', dados.token);
+  localStorage.setItem('tipoPerfil', dados.tipoPerfil);
+  localStorage.setItem('usuarioId', dados.usuarioId);
+  localStorage.setItem('nomeUsuario', dados.nome);
+  
+  // ADICIONE ESTAS DUAS LINHAS:
+  localStorage.setItem('emailUsuario', dados.email || '');
+  localStorage.setItem('cpfUsuario', dados.cpf || '');
+  
+  localStorage.setItem('asiloId', dados.asilo?.id || dados.asiloId);
+  
+  applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
+};
 
   // Revogo os acessos e limpo o estado da aplicação
   const handleLogout = () => {

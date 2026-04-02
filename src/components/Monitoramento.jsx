@@ -17,6 +17,9 @@ export default function Monitoramento() {
   const [telemetria, setTelemetria] = useState({});
   const [openModal, setOpenModal] = useState(false);
   const [idosoEditando, setIdosoEditando] = useState(null);
+  const perfilLogado = localStorage.getItem('tipoPerfil');
+  const usuarioIdLogado = Number(localStorage.getItem('usuarioId'));
+  
 
   // Busco a lista completa de idosos na API
   const fetchIdosos = async () => {
@@ -67,12 +70,24 @@ export default function Monitoramento() {
   }, [idosos, telemetria]);
 
   // Filtro os idosos ativos aplicando a regra de texto da barra de pesquisa
-  const idososFiltrados = idosos.filter(idoso => 
-    idoso.ativo && (
-      idoso.nome?.toLowerCase().includes(termoPesquisa.toLowerCase()) ||
-      idoso.dispositivo?.serial?.toLowerCase().includes(termoPesquisa.toLowerCase())
-    )
+  const idososFiltrados = idosos.filter(idoso => {
+  // 1. Regra de Inativo (comum a todos)
+  if (!idoso.ativo) return false;
+
+  // 2. Regra de Vínculo para Familiar
+  if (perfilLogado === 'FAMILIAR') {
+    // Verificamos se o idoso possui uma lista de usuários e se o meu ID está lá
+    const vinculadoAMim = idoso.usuarios?.some(u => (u.id || u.usuarioId) === usuarioIdLogado);
+    if (!vinculadoAMim) return false;
+  }
+
+  // 3. Regra da Barra de Pesquisa (comum a todos)
+  const termo = termoPesquisa.toLowerCase();
+  return (
+    idoso.nome?.toLowerCase().includes(termo) ||
+    idoso.dispositivo?.serial?.toLowerCase().includes(termo)
   );
+});
 
   // Processo a exclusão lógica do idoso
   const handleDelete = async (id, nome) => {
@@ -277,10 +292,18 @@ export default function Monitoramento() {
             onChange={(e) => setIdosoEditando({...idosoEditando, email: e.target.value})}
           />
           
-          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-            <Button fullWidth variant="outlined" onClick={() => setOpenModal(false)}>Cancelar</Button>
-            <Button fullWidth variant="contained" sx={{ bgcolor: '#2d5a27' }} onClick={salvarEdicao}>Salvar</Button>
-          </Box>
+          <Box>
+  {perfilLogado !== 'FAMILIAR' && (
+    <>
+      <IconButton size="small" sx={{ color: '#3498db' }} onClick={() => handleEdit(idosos.id)}>
+        <EditIcon />
+      </IconButton>
+      <IconButton size="small" sx={{ color: '#e74c3c' }} onClick={() => handleDelete(idosos.id, idosos.nome)}>
+        <DeleteIcon />
+      </IconButton>
+    </>
+  )}
+</Box>
         </Box>
       </Modal>
   </Box>
