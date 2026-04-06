@@ -6,10 +6,10 @@ import {
 } from "@mui/material";
 
 export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
-  // Inicializo o estado do formulário para o perfil GESTOR
+  // Inicializa o estado do formulário para o perfil GESTOR
   const [gestor, setGestor] = useState({ nome: '', email: '', senha: '', cpf: '' });
 
-  // Submeto os dados para configuração final do asilo
+  // Submete os dados para configuração final do asilo
   const handleSubmit = async () => {
     try {
       await axios.post("http://localhost:8080/usuarios", {
@@ -20,18 +20,18 @@ export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
       
       alert("Configuração finalizada com sucesso! Faça Login novamente.");
       
-      // Chamo a função onFinish se ela foi injetada pelo pai
+      // Chama a função onFinish se ela foi injetada pelo pai
       if (onFinish) onFinish(); 
 
     } catch (error) {
       console.error("Erro na requisição:", error.response?.data || error.message);
       
-      // Verifico se o erro é uma resposta válida da API (Ex: DataIntegrityViolationException)
+      // Verifica se o erro é uma resposta válida da API (Ex: DataIntegrityViolationException)
       if (error.response) {
         const mensagem = error.response.data.detail || error.response.data.message || "Verifique se CPF ou Email já estão cadastrados.";
         alert(mensagem);
       } else {
-        // Trato falhas de rede ou interrupções abruptas
+        // Trata falhas de rede ou interrupções abruptas
         alert("Erro interno no sistema. Verifique o console.");
       }
     }

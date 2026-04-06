@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Paper, Grid, Alert, CircularProgress } from '@mui/material';
 
 export default function CadastrarIdoso({ gestorAsiloId }) {
-  // Inicializo os dados base do idoso e vínculo obrigatório com o asilo atual
+  // Inicializa os dados base do idoso e vínculo obrigatório com o asilo atual
   const [formData, setFormData] = useState({
     nome: '',
     cpf: '',
@@ -11,22 +11,22 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
     asiloId: gestorAsiloId
   });
 
-  // Garanto que o asiloId seja atualizado caso venha atrasado do componente pai
+  // Garante que o asiloId seja atualizado caso venha atrasado do componente pai
   useEffect(() => {
     if (gestorAsiloId) {
       setFormData(prev => ({ ...prev, asiloId: gestorAsiloId }));
     }
   }, [gestorAsiloId]);
 
-  // Crio os controladores de estado da requisição
+  // Cria os controladores de estado da requisição
   const [status, setStatus] = useState({ loading: false, error: null, success: false });
 
-  // Processo a comunicação nativa usando fetch
+  // Processa a comunicação nativa usando fetch
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ loading: true, error: null, success: false });
     
-    // Recupero o token atual da sessão
+    // Recupera o token atual da sessão
     const token = localStorage.getItem('token');
 
     try {
@@ -42,16 +42,16 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
       // Se a resposta retornar um status de erro (4xx ou 5xx)
       if (!response.ok) {
         const err = await response.json();
-        // Disparo o erro lendo a padronização do Spring Boot
+        // Dispara o erro lendo a padronização do Spring Boot
         throw new Error(err.detail || err.message || 'Erro ao cadastrar idoso.');
       }
 
-      // Limpo os dados em caso de sucesso absoluto
+      // Limpa os dados em caso de sucesso absoluto
       setStatus({ loading: false, error: null, success: true });
       setFormData({ nome: '', cpf: '', email: '', serialDispositivo: '', asiloId: gestorAsiloId });
       
     } catch (err) {
-      // Capturo o disparo estruturado acima e jogo na tela
+      // Captura o disparo estruturado acima e jogo na tela
       setStatus({ loading: false, error: err.message, success: false });
     }
   };

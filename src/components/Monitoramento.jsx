@@ -11,7 +11,7 @@ import ThermostatIcon from '@mui/icons-material/Thermostat';
 import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
 
 export default function Monitoramento() {
-  // Inicializo os estados globais da tela de monitoramento
+  // Inicializa os estados globais da tela de monitoramento
   const [idosos, setIdosos] = useState([]);
   const [termoPesquisa, setTermoPesquisa] = useState("");
   const [telemetria, setTelemetria] = useState({});
@@ -19,24 +19,37 @@ export default function Monitoramento() {
   const [idosoEditando, setIdosoEditando] = useState(null);
   const perfilLogado = localStorage.getItem('tipoPerfil');
   const usuarioIdLogado = Number(localStorage.getItem('usuarioId'));
+  const podeEditar = perfilLogado === 'GESTOR' || perfilLogado === 'ROLE_GESTOR';
   
-
-  // Busco a lista completa de idosos na API
+// Busca a lista de idosos na API (Dinâmico por perfil)
   const fetchIdosos = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/idosos");
+      const token = localStorage.getItem('token');
+      const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
+      
+      // Rota padrão para Gestores, Enfermeiros e Cuidadores
+      let endpoint = "http://localhost:8080/idosos";
+
+      // Se for FAMILIAR, bate na rota nova que você acabou de criar!
+      if (perfilLogado === 'FAMILIAR' || perfilLogado === 'ROLE_FAMILIAR') {
+        endpoint = `http://localhost:8080/usuarios/${usuarioIdLogado}/idosos`;
+      }
+
+      const response = await axios.get(endpoint, authHeaders);
+      console.log("LISTA DE IDOSOS RECEBIDA:", response.data);
       setIdosos(response.data);
+      
     } catch (error) {
       console.error("Erro ao buscar idosos", error);
     }
   };
 
-  // Executo a primeira busca de idosos ao montar o componente
+  // Executa a primeira busca de idosos ao montar o componente
   useEffect(() => {
     fetchIdosos();
   }, []);
 
-  // Crio um intervalo para buscar a telemetria a cada 3 segundos
+  // Cria um intervalo para buscar a telemetria a cada 3 segundos
   useEffect(() => {
     if (idosos.length === 0) return;
 
@@ -65,53 +78,59 @@ export default function Monitoramento() {
       }
     }, 3000);
 
-    // Limpo o intervalo quando o componente for desmontado para evitar memory leak
+    // Limpa o intervalo quando o componente for desmontado para evitar memory leak
     return () => clearInterval(interval);
   }, [idosos, telemetria]);
 
-  // Filtro os idosos ativos aplicando a regra de texto da barra de pesquisa
+// Filtra os idosos ativos aplicando a regra de texto da barra de pesquisa
   const idososFiltrados = idosos.filter(idoso => {
-  // 1. Regra de Inativo (comum a todos)
-  if (!idoso.ativo) return false;
+    // 1. Regra de Inativo (comum a todos)
+    if (!idoso.ativo) return false;
 
-  // 2. Regra de Vínculo para Familiar
-  if (perfilLogado === 'FAMILIAR') {
-    // Verificamos se o idoso possui uma lista de usuários e se o meu ID está lá
-    const vinculadoAMim = idoso.usuarios?.some(u => (u.id || u.usuarioId) === usuarioIdLogado);
-    if (!vinculadoAMim) return false;
-  }
+    // A regra de vínculo foi apagada porque o Backend já fez esse trabalho!
 
-  // 3. Regra da Barra de Pesquisa (comum a todos)
-  const termo = termoPesquisa.toLowerCase();
-  return (
-    idoso.nome?.toLowerCase().includes(termo) ||
-    idoso.dispositivo?.serial?.toLowerCase().includes(termo)
-  );
-});
+    // 2. Regra da Barra de Pesquisa (comum a todos)
+    const termo = termoPesquisa.toLowerCase();
+    return (
+      idoso.nome?.toLowerCase().includes(termo) ||
+      idoso.dispositivo?.serial?.toLowerCase().includes(termo)
+    );
+  });
 
-  // Processo a exclusão lógica do idoso
   const handleDelete = async (id, nome) => {
-    if (window.confirm(`ATENÇÃO: Deseja inativar o idoso ${nome}?`)) {
-      try {
-        await axios.delete(`http://localhost:8080/idosos/${id}`);
-        alert("Idoso inativado com sucesso!");
-        fetchIdosos(); // Recarrego os dados para atualizar a tela
-      } catch (error) {
-        const msgErro = error.response?.data?.detail || error.response?.data?.message || "Erro interno.";
-        alert("Erro ao inativar idoso: " + msgErro);
-      }
+    // BLOQUEIO DE SEGURANÇA ADICIONAL
+    if (perfilLogado === 'FAMILIAR' || perfilLogado === 'ENFERMEIRO') {
+        alert("Erro: Familiares/Enfermeiros não têm permissão para inativar idosos.");
+        return;
     }
-  };
 
-  // Preparo os dados do idoso selecionado para o modal de edição
+    if (window.confirm(`ATENÇÃO: Deseja inativar o idoso ${nome}?`)) {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`http://localhost:8080/idosos/${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            alert("Idoso inativado com sucesso!");
+            fetchIdosos(); 
+        } catch (error) {
+            alert("Erro ao inativar: " + (error.response?.data?.message || "Erro interno."));
+        }
+    }
+};
+
+  // Prepara os dados do idoso selecionado para o modal de edição
   const handleEdit = (id) => {
-    // Localizo o idoso específico diretamente na lista já carregada
+    if (perfilLogado === 'FAMILIAR' || perfilLogado === 'ENFERMEIRO') {
+        alert("Erro: Familiares/Enfermeiros não têm permissão para editar informações dos idosos.");
+        return;
+    }
+    // Localiza o idoso específico diretamente na lista já carregada
     const idosoSelecionado = idosos.find(i => i.id === id); 
     setIdosoEditando({ ...idosoSelecionado });
     setOpenModal(true);
   };
 
-  // Submeto as atualizações do idoso para a API
+  // Submete as atualizações do idoso para a API
   const salvarEdicao = async () => {
     try {
       await axios.put(`http://localhost:8080/idosos/${idosoEditando.id}`, {
@@ -281,28 +300,28 @@ export default function Monitoramento() {
         }}>
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>Editar Idoso</Typography>
           
-          <MuiTextField 
-            fullWidth label="Nome" sx={{ mb: 2 }}
-            value={idosoEditando?.nome || ""} 
-            onChange={(e) => setIdosoEditando({...idosoEditando, nome: e.target.value})}
-          />
-          <MuiTextField 
-            fullWidth label="Email do Familiar" sx={{ mb: 2 }}
-            value={idosoEditando?.email || ""} 
-            onChange={(e) => setIdosoEditando({...idosoEditando, email: e.target.value})}
-          />
+          <Button onClick={() => setOpenModal(false)} color="inherit">
+    Cancelar
+  </Button>
+  <Button 
+    variant="contained" 
+    onClick={salvarEdicao}
+    sx={{ bgcolor: '#1a3a16', '&:hover': { bgcolor: '#2e5a26' } }}
+  >
+    Salvar Alterações
+  </Button>
           
           <Box>
-  {perfilLogado !== 'FAMILIAR' && (
-    <>
-      <IconButton size="small" sx={{ color: '#3498db' }} onClick={() => handleEdit(idosos.id)}>
-        <EditIcon />
-      </IconButton>
-      <IconButton size="small" sx={{ color: '#e74c3c' }} onClick={() => handleDelete(idosos.id, idosos.nome)}>
-        <DeleteIcon />
-      </IconButton>
-    </>
-  )}
+  {podeEditar && (
+  <Box>
+    <IconButton size="small" sx={{ color: '#3498db' }} onClick={() => handleEdit(idosos.id)}>
+      <EditIcon />
+    </IconButton>
+    <IconButton size="small" sx={{ color: '#e74c3c' }} onClick={() => handleDelete(idosos.id, idosos.nome)}>
+      <DeleteIcon />
+    </IconButton>
+  </Box>
+)}
 </Box>
         </Box>
       </Modal>

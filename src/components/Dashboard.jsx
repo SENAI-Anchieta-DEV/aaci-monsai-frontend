@@ -24,10 +24,10 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [telaAtiva, setTelaAtiva] = useState('monitoramento');
 
-  // 1. Padronizamos o perfil para letras maiúsculas para evitar erros de digitação (ex: ROLE_CUIDADOR ou apenas CUIDADOR)
+  // 1. Padroniza o perfil para letras maiúsculas para evitar erros de digitação (ex: ROLE_CUIDADOR ou apenas CUIDADOR)
   const perfilUsuario = perfil?.toUpperCase() || '';
 
-  // 2. Adicionamos a regra 'perfisPermitidos' em cada item do menu
+  // 2. Adiciona a regra 'perfisPermitidos' em cada item do menu
   const menuItems = [
     { 
       id: 'monitoramento', label: 'Monitoramento', icon: <MonitorHeartIcon />, 
@@ -55,7 +55,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
     }
   ];
 
-  // 3. Filtramos o menu ANTES de exibi-lo. Se o perfil do usuário não estiver na lista, o botão nem renderiza.
+  // 3. Filtra o menu ANTES de exibi-lo. Se o perfil do usuário não estiver na lista, o botão nem renderiza.
   const menuPermitido = menuItems.filter(item => 
     item.perfisPermitidos.some(p => perfilUsuario.includes(p))
   );
@@ -65,7 +65,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
     setDrawerOpen(false);
   };
 
-  // 4. Protegemos a renderização. Se houver falha e a tela não bater com a permissão, bloqueamos.
+  // 4. Protege a renderização. Se houver falha e a tela não bater com a permissão, bloqueamos.
   const renderizarTela = () => {
     // Verificação extra de segurança para a tela de cadastro de idoso
     if (telaAtiva === 'cadastrar_idoso' && perfilUsuario.includes('ENFERMEIRA')) {
@@ -78,7 +78,6 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
       case 'cadastrar': return <CadastrarUsuario asiloId={asiloId} />; 
       case 'gerenciar': return <GerenciarUsuarios asiloId={asiloId} />;
       case 'minha_conta': return <MinhaConta />;
-      // Telas que você ainda vai criar, deixei como fallback:
       case 'localizar': return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>;
       case 'historico_alertas': return <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>;
       

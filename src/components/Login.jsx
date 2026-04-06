@@ -24,7 +24,7 @@ const theme = createTheme({
   },
 });
 
-// Defino as opções de navegação e os perfis do sistema
+// Define as opções de navegação e os perfis do sistema
 const navLinks = ["Voltar ao Home", "Sobre nós", "Contato"];
 
 const roles = [
@@ -35,7 +35,7 @@ const roles = [
   { id: "familiar",      label: "Familiar" },
 ];
 
-// Desenho o ícone dinâmico do usuário
+// Desenha o ícone dinâmico do usuário
 function PersonIcon({ active }) {
   const color = active ? "#fff" : "#2d5a27";
   return (
@@ -47,7 +47,7 @@ function PersonIcon({ active }) {
 }
 
 export default function Login({ onLogin, onVoltar }) {
-  // Inicializo as credenciais e as configurações de tela
+  // Inicializa as credenciais e as configurações de tela
   const [selectedRole, setSelectedRole] = useState("gestor");
   const [credential, setCredential]     = useState("");
   const [password, setPassword]         = useState("");
@@ -55,16 +55,16 @@ export default function Login({ onLogin, onVoltar }) {
   
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Gerencio a navegação do menu lateral
+  // Gerencia a navegação do menu lateral
   const handleNav = (link) => {
     setDrawerOpen(false);
     if (link === "Voltar ao Home" && onVoltar) onVoltar();
   };
 
-  // Processo a tentativa de autenticação
+  // Processa a tentativa de autenticação
   const handleLogin = async () => {
     try {
-      // 1. Executo a autenticação inicial com e-mail e senha
+      // 1. Executa a autenticação inicial com e-mail e senha
       const response = await axios.post("http://localhost:8080/auth/login", {
         email: credential,
         senha: password,
@@ -72,25 +72,25 @@ export default function Login({ onLogin, onVoltar }) {
 
       const { token, tipoPerfil } = response.data;
 
-      // 2. Busco os dados completos da lista de usuários usando o token obtido
+      // 2. Busca os dados completos da lista de usuários usando o token obtido
       const userDetailsRes = await axios.get("http://localhost:8080/usuarios", {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // 3. Filtro o usuário específico que acabou de logar
+      // 3. Filtra o usuário específico que acabou de logar
       const usuarioLogado = userDetailsRes.data.find(
         (u) => u.email.toLowerCase() === credential.toLowerCase()
       );
 
       if (usuarioLogado) {
-        // Monto o pacote consolidado de informações e envio para o App.js
+        // Monta o pacote consolidado de informações e envio para o App.js
         const pacoteCompleto = {
           token: token,
           tipoPerfil: tipoPerfil,
           asiloId: usuarioLogado.asilo?.id,
           usuarioId: usuarioLogado.id,
           nome: usuarioLogado.nome,
-          email: usuarioLogado.email, // <--- GARANTA QUE ISSO EXISTE NO JSON
+          email: usuarioLogado.email,
           cpf: usuarioLogado.cpf,
         };
         console.log("Pacote enviado para o App:", pacoteCompleto);
@@ -102,7 +102,7 @@ export default function Login({ onLogin, onVoltar }) {
     } catch (error) {
       console.error("Erro de autenticação:", error);
       
-      // Capturo explicitamente o BadCredentialsException (401) do backend
+      // Captura explicitamente o BadCredentialsException (401) do backend
       const msg = error.response?.data?.detail || error.response?.data?.message || "Verifique suas credenciais.";
       alert("Falha no login: " + msg);
     }

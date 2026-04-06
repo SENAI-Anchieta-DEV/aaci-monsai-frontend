@@ -7,7 +7,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import axios from 'axios';
 
 export default function MinhaConta() {
-  // Pegamos os dados direto do localStorage, sem precisar de GET no servidor
+  // Pega os dados direto do localStorage, sem precisar de GET no servidor
   const [usuario] = useState({
     nome: localStorage.getItem('nomeUsuario') || 'Não informado',
     email: localStorage.getItem('emailUsuario') || 'Não informado',
@@ -17,7 +17,7 @@ export default function MinhaConta() {
   const [senhas, setSenhas] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });
   const [mensagem, setMensagem] = useState({ texto: '', tipo: '' });
 
-  // Removemos o useEffect que fazia o GET, pois ele causa o erro 405/500
+  // Remove o useEffect que fazia o GET, pois ele causa o erro 405/500
 
   const handleSenhaChange = (e) => setSenhas({ ...senhas, [e.target.name]: e.target.value });
 
@@ -34,7 +34,7 @@ export default function MinhaConta() {
     }
 
     try {
-      // O PATCH continua funcionando pois o seu log mostrou que a senha atualiza!
+      // PATCH de atualizar senha
       await axios.patch(`http://localhost:8080/usuarios/${usuarioId}/senha`, {
         senhaAtual: senhas.senhaAtual,
         novaSenha: senhas.novaSenha
