@@ -3,14 +3,14 @@ import axios from 'axios';
 
 import './App.css'; 
 
-import Home from './components/Home';
-import Login from './components/Login';
-import Lojinha from './components/Lojinha';
-import Dashboard from './components/Dashboard';
-import AdminSetup from './components/AdminSetup';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Lojinha from './pages/Lojinha';
 import RecuperarSenha from './pages/RecuperarSenha';
 import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
+import Dashboard from './components/Dashboard';
+import AdminSetup from './components/AdminSetup';
 import { ToastProvider } from './components/ToastContext';
 
 // Rotas do sistema para evitar erros de digitação e facilitar manutenção

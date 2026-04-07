@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import { validarNome, validarEmail, validarCPF, validarSenha, coletarErros } from '../utils/validators';
 import { mascararCPF, mascararCNPJ } from '../utils/masks';
+import api from '../utils/api';
 
 // ─── Formulário do Gestor (Passo 2) ──────────────────────────────────────────
 export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
@@ -27,11 +28,7 @@ export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
     }
 
     try {
-      await axios.post("/usuarios", {
-        ...gestor,
-        tipoUsuario: "GESTOR",
-        asiloId,
-      });
+      await api.post("/usuarios", { ...gestor, tipoUsuario: "GESTOR", asiloId });
 
       alert("Configuração finalizada com sucesso! Faça Login novamente.");
       if (onFinish) onFinish();
@@ -126,7 +123,7 @@ export default function OnBoardingAdmin({ onFinish, onLogout }) {
     }
 
     try {
-      const res = await axios.post("/asilos", asiloData);
+      const res = await api.post("/asilos", asiloData);
       // Garante que pegamos o ID vindo do banco
       setAsiloId(res.data.id || res.data.asilo_id);
       setActiveStep(1);
