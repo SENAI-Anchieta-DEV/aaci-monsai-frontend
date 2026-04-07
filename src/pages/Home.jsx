@@ -2,6 +2,7 @@ import { useState } from "react";
 import logo from "../assets/Logo_nome.png";
 import logoCompleta from "../assets/Logo_completa.png";
 import idosoFeliz from "../assets/idoso_feliz_2.png";
+import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
@@ -50,11 +51,29 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [email, setEmail]           = useState("");
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const showToast = useToast();
 
   const handleNav = (link) => {
     setDrawerOpen(false);
     if (link === "Sou Cliente")      onIrParaLogin();
     if (link === "Solicitar adesão") onIrParaLojinha();
+  };
+
+  const handleEnviarEmail = () => {
+    if (!email || !email.includes("@")) {
+      showToast({
+        type: "error",
+        title: "Email inválido",
+        message: "Por favor, insira um endereço de email válido.",
+      });
+      return;
+    }
+    showToast({
+      type: "success",
+      title: "Email enviado!",
+      message: `Entraremos em contato com ${email} em breve.`,
+    });
+    setEmail("");
   };
 
   return (
@@ -98,65 +117,61 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
             ))}
           </List>
         </Box>
-      </Drawer> 
+      </Drawer>
 
-     {/* ── HERO ── */}
-<Box sx={{
-  position: "relative",
-  height: { xs: "100svh", md: "600px" }, // tela cheia no mobile
-  overflow: "hidden",
-  display: "flex",
-  alignItems: "center",
-}}>
-  {/* Imagem de fundo */}
-  <Box component="img" src={idosoFeliz} alt="Idoso feliz"
-    sx={{
-      position: "absolute", inset: 0,
-      width: "100%", height: { xs: "100%", md: "700px" },
-      objectFit: "cover",
-      objectPosition: { xs: "27% center", md: "left center" },
-    }}
-  />
+      {/* ── HERO ── */}
+      <Box sx={{
+        position: "relative",
+        height: { xs: "100svh", md: "600px" },
+        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+      }}>
+        <Box component="img" src={idosoFeliz} alt="Idoso feliz"
+          sx={{
+            position: "absolute", inset: 0,
+            width: "100%", height: { xs: "100%", md: "700px" },
+            objectFit: "cover",
+            objectPosition: { xs: "27% center", md: "left center" },
+          }}
+        />
 
-  {/* Gradiente mobile: escurece a foto / desktop: fade lateral verde */}
-  <Box sx={{
-    position: "absolute", inset: 0,
-    background: {
-      xs: "rgba(0, 0, 0, 0.52)",                                              // escurecimento uniforme
-      md: "linear-gradient(to right, transparent 40%, #AED696 60%, #AED696 100%)",
-    },
-  }} />
+        <Box sx={{
+          position: "absolute", inset: 0,
+          background: {
+            xs: "rgba(0, 0, 0, 0.52)",
+            md: "linear-gradient(to right, transparent 40%, #AED696 60%, #AED696 100%)",
+          },
+        }} />
 
-  {/* Conteúdo */}
-  <Box sx={{
-    position: "relative", zIndex: 1,
-    ml: { xs: 0, md: "auto" },
-    width: { xs: "100%", md: "50%" },
-    display: "flex", flexDirection: "column",
-    alignItems: "center", justifyContent: "center",
-    gap: 2, p: { xs: 4, md: 6 }, textAlign: "center",
-  }}>
-    {/* Logo: sempre visível. No mobile some o logoCompleta e mostra só a logo simples, ou vice-versa */}
-    <Box component="img"
-      src={logoCompleta}
-      alt="MONSAI"
-      sx={{
-        width: { xs: "260px", md: "400px" },
-        objectFit: "contain",
-        filter: { xs: "brightness(0) invert(1)", md: "none" }, // branca no mobile
-      }}
-    />
+        <Box sx={{
+          position: "relative", zIndex: 1,
+          ml: { xs: 0, md: "auto" },
+          width: { xs: "100%", md: "50%" },
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          gap: 2, p: { xs: 4, md: 6 }, textAlign: "center",
+        }}>
+          <Box component="img"
+            src={logoCompleta}
+            alt="MONSAI"
+            sx={{
+              width: { xs: "260px", md: "400px" },
+              objectFit: "contain",
+              filter: { xs: "brightness(0) invert(1)", md: "none" },
+            }}
+          />
 
-    {/* Tagline: some no mobile pra manter o look limpo */}
-    <Typography variant="h5" sx={{
-      display: { xs: "none", md: "block" },
-      color: "#1a3d0a", fontStyle: "italic", fontWeight: 600,
-      lineHeight: 1.6, fontSize: "40px",
-    }}>
-      " O monitoramento<br />que protege vidas."
-    </Typography>
-  </Box>
-</Box>
+          <Typography variant="h5" sx={{
+            display: { xs: "none", md: "block" },
+            color: "#1a3d0a", fontStyle: "italic", fontWeight: 600,
+            lineHeight: 1.6, fontSize: "40px",
+          }}>
+            " O monitoramento<br />que protege vidas."
+          </Typography>
+        </Box>
+      </Box>
+
       {/* ── SOBRE / PRODUTO ── */}
       <Container maxWidth="lg" sx={{ py: { xs: 5, md: 7 } }}>
         <Box sx={{ textAlign: "center", mb: 5 }}>
@@ -297,7 +312,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
                 }}
               />
               <Button variant="contained" color="primary"
-                onClick={() => { alert(`Enviado: ${email}`); setEmail(""); }}
+                onClick={handleEnviarEmail}
                 sx={{ borderRadius: 0, px: 2, fontSize: "0.8rem",
                   bgcolor: "primary.dark", "&:hover": { bgcolor: "#0f2606" } }}>
                 Enviar

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+
 import './App.css'; 
 
 import Home from './components/Home';
@@ -7,6 +8,10 @@ import Login from './components/Login';
 import Lojinha from './components/Lojinha';
 import Dashboard from './components/Dashboard';
 import AdminSetup from './components/AdminSetup';
+import RecuperarSenha from './pages/RecuperarSenha';
+import AlterarSenha from './pages/AlterarSenha';
+import Pagamento from './pages/Pagamento';
+import { ToastProvider } from './components/ToastContext';
 
 // Rotas do sistema para evitar erros de digitação e facilitar manutenção
 const SCREENS = {
@@ -14,20 +19,22 @@ const SCREENS = {
   LOGIN: 'login',
   LOJINHA: 'lojinha',
   DASHBOARD: 'painel',
-  ADMIN_SETUP: 'admin_setup'
+  ADMIN_SETUP: 'admin_setup',
+  RECUPERAR: 'recuperar',
+  ALTERAR: 'alterar',
+  PAGAMENTO: 'pagamento'
 };
 
 function App() {
   // Inicializa os controladores principais de navegação e permissão
   const [currentScreen, setCurrentScreen] = useState(SCREENS.HOME);
   const [auth, setAuth] = useState({ isAuth: false, perfil: '', asiloId: null });
+  const [qty, setQty] = useState(1);
 
-  // 1. Centraliza a lógica de autenticação usando useCallback para otimizar renderizações
-  const applyAuth = useCallback((token, perfil, asiloId) => {
+const applyAuth = useCallback((token, perfil, asiloId) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setAuth({ isAuth: true, perfil, asiloId }); 
     
-    // Roteia o usuário baseado no seu nível de privilégio
     if (perfil === 'SUPER_ADMIN') {
       setCurrentScreen(SCREENS.ADMIN_SETUP);
     } else {
@@ -35,17 +42,16 @@ function App() {
     }
   }, []);
 
-  // 2. Verifica o LocalStorage ao abrir o app para manter a sessão ativa
   useEffect(() => {
     const token = localStorage.getItem('token');
     const perfil = localStorage.getItem('tipoPerfil');
     const asiloId = localStorage.getItem('asiloId'); 
     
-    
     if (token && perfil) {
       applyAuth(token, perfil, asiloId);
     }
   }, [applyAuth]);
+
 
   // 3. Processa e persiste os dados recebidos após um login bem-sucedido
   const handleLoginSuccess = (dados) => {
@@ -69,7 +75,6 @@ function App() {
     setAuth({ isAuth: false, perfil: '' });
     setCurrentScreen(SCREENS.HOME);
   };
-
   // 4. Decide qual componente renderizar com base no estado 'currentScreen'
   const renderContent = () => {
     switch (currentScreen) {
@@ -80,20 +85,42 @@ function App() {
         return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogout} />;
       
       case SCREENS.LOJINHA:
-        return <Lojinha onVoltar={() => setCurrentScreen(SCREENS.HOME)} onLogin={() => setCurrentScreen(SCREENS.LOGIN)} />;
+        return (
+          <Lojinha 
+            onVoltar={() => setCurrentScreen(SCREENS.HOME)} 
+            onLogin={() => setCurrentScreen(SCREENS.LOGIN)} 
+            onComprar={(q) => { setQty(q); setCurrentScreen(SCREENS.PAGAMENTO); }} 
+          />
+        );
       
+      case SCREENS.PAGAMENTO:
+        return <Pagamento onVoltar={() => setCurrentScreen(SCREENS.LOJINHA)} onHome={() => setCurrentScreen(SCREENS.HOME)} qty={qty} />;
+
       case SCREENS.LOGIN:
-        return <Login onLogin={handleLoginSuccess} onVoltar={() => setCurrentScreen(SCREENS.HOME)} />;
+        return (
+          <Login 
+            onLogin={handleLoginSuccess} 
+            onVoltar={() => setCurrentScreen(SCREENS.HOME)} 
+            onRecuperar={() => setCurrentScreen(SCREENS.RECUPERAR)} 
+          />
+        );
+
+      case SCREENS.RECUPERAR:
+        return <RecuperarSenha onVoltar={() => setCurrentScreen(SCREENS.LOGIN)} onProximo={() => setCurrentScreen(SCREENS.ALTERAR)} />;
+
+      case SCREENS.ALTERAR:
+        return <AlterarSenha onSucesso={() => setCurrentScreen(SCREENS.LOGIN)} onVoltar={() => setCurrentScreen(SCREENS.RECUPERAR)} />;
       
       default:
         return <Home onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} />;
     }
   };
-
   return (
-    <div className="App">
-      {renderContent()}
-    </div>
+    <ToastProvider>
+      <div className="App">
+        {renderContent()}
+      </div>
+    </ToastProvider>
   );
 }
 
