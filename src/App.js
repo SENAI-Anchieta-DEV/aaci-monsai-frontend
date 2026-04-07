@@ -8,7 +8,7 @@ import Lojinha from './components/Lojinha';
 import Dashboard from './components/Dashboard';
 import AdminSetup from './components/AdminSetup';
 
-// Armazeno as rotas do sistema para evitar erros de digitação e facilitar manutenção
+// Rotas do sistema para evitar erros de digitação e facilitar manutenção
 const SCREENS = {
   HOME: 'home',
   LOGIN: 'login',
@@ -18,16 +18,16 @@ const SCREENS = {
 };
 
 function App() {
-  // Inicializo os controladores principais de navegação e permissão
+  // Inicializa os controladores principais de navegação e permissão
   const [currentScreen, setCurrentScreen] = useState(SCREENS.HOME);
   const [auth, setAuth] = useState({ isAuth: false, perfil: '', asiloId: null });
 
-  // 1. Centralizo a lógica de autenticação usando useCallback para otimizar renderizações
+  // 1. Centraliza a lógica de autenticação usando useCallback para otimizar renderizações
   const applyAuth = useCallback((token, perfil, asiloId) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setAuth({ isAuth: true, perfil, asiloId }); 
     
-    // Roteio o usuário baseado no seu nível de privilégio
+    // Roteia o usuário baseado no seu nível de privilégio
     if (perfil === 'SUPER_ADMIN') {
       setCurrentScreen(SCREENS.ADMIN_SETUP);
     } else {
@@ -35,7 +35,7 @@ function App() {
     }
   }, []);
 
-  // 2. Verifico o LocalStorage ao abrir o app para manter a sessão ativa
+  // 2. Verifica o LocalStorage ao abrir o app para manter a sessão ativa
   useEffect(() => {
     const token = localStorage.getItem('token');
     const perfil = localStorage.getItem('tipoPerfil');
@@ -47,14 +47,13 @@ function App() {
     }
   }, [applyAuth]);
 
-  // 3. Processo e persisto os dados recebidos após um login bem-sucedido
+  // 3. Processa e persiste os dados recebidos após um login bem-sucedido
   const handleLoginSuccess = (dados) => {
   localStorage.setItem('token', dados.token);
   localStorage.setItem('tipoPerfil', dados.tipoPerfil);
   localStorage.setItem('usuarioId', dados.usuarioId);
   localStorage.setItem('nomeUsuario', dados.nome);
   
-  // ADICIONE ESTAS DUAS LINHAS:
   localStorage.setItem('emailUsuario', dados.email || '');
   localStorage.setItem('cpfUsuario', dados.cpf || '');
   
@@ -63,7 +62,7 @@ function App() {
   applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
 };
 
-  // Revogo os acessos e limpo o estado da aplicação
+  // Revoga os acessos e limpa o estado da aplicação
   const handleLogout = () => {
     localStorage.clear(); 
     delete axios.defaults.headers.common['Authorization'];
@@ -71,7 +70,7 @@ function App() {
     setCurrentScreen(SCREENS.HOME);
   };
 
-  // 4. Decido qual componente renderizar com base no estado 'currentScreen'
+  // 4. Decide qual componente renderizar com base no estado 'currentScreen'
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:

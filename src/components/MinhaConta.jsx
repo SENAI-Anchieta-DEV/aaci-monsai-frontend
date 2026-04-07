@@ -1,67 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Box, Typography, Paper, TextField, Button, Grid, Divider, Avatar, Alert 
 } from '@mui/material';
 import LockResetIcon from '@mui/icons-material/LockReset';
-import SaveIcon from '@mui/icons-material/Save';
-import axios from 'axios';
+import SaveIcon      from '@mui/icons-material/Save';
+import api           from '../utils/api';
+import { useAuth }   from '../hooks/useAuth';
+import { validarConfirmacaoSenha, validarSenha } from '../utils/validators';
 
 export default function MinhaConta() {
-  // Pega os dados direto do localStorage, sem precisar de GET no servidor
-  const [usuario] = useState({
-    nome: localStorage.getItem('nomeUsuario') || 'Não informado',
-    email: localStorage.getItem('emailUsuario') || 'Não informado',
-    cpf: localStorage.getItem('cpfUsuario') || '000.000.000-00',
-  });
+  // Pega os dados direto do localStorage via hook, sem precisar de GET no servidor
+  const { nome, email, cpf, perfil, usuarioId } = useAuth();
 
-  const [senhas, setSenhas] = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });
-  const [mensagem, setMensagem] = useState({ texto: '', tipo: '' });
-
-  // Remove o useEffect que fazia o GET, pois ele causa o erro 405/500
+  const [senhas, setSenhas]       = useState({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });
+  const [mensagem, setMensagem]   = useState({ texto: '', tipo: '' });
 
   const handleSenhaChange = (e) => setSenhas({ ...senhas, [e.target.name]: e.target.value });
 
   const handleAtualizarSenha = async () => {
-    const usuarioId = localStorage.getItem('usuarioId');
     if (!usuarioId) {
-        setMensagem({ texto: 'Sessão inválida.', tipo: 'error' });
-        return;
+      setMensagem({ texto: 'Sessão inválida.', tipo: 'error' });
+      return;
     }
-    
-    if (senhas.novaSenha !== senhas.confirmarSenha) {
-      setMensagem({ texto: 'As senhas não coincidem.', tipo: 'error' });
+
+    // Valida força da nova senha e confirmação antes de enviar
+    const erroNovaSenha   = validarSenha(senhas.novaSenha);
+    const erroConfirmacao = validarConfirmacaoSenha(senhas.novaSenha, senhas.confirmarSenha);
+
+    if (erroNovaSenha || erroConfirmacao) {
+      setMensagem({ texto: erroNovaSenha || erroConfirmacao, tipo: 'error' });
       return;
     }
 
     try {
       // PATCH de atualizar senha
-      await axios.patch(`http://localhost:8080/usuarios/${usuarioId}/senha`, {
+      await api.patch(`/usuarios/${usuarioId}/senha`, {
         senhaAtual: senhas.senhaAtual,
-        novaSenha: senhas.novaSenha
+        novaSenha:  senhas.novaSenha,
       });
+
       setMensagem({ texto: 'Senha atualizada com sucesso!', tipo: 'success' });
       setSenhas({ senhaAtual: '', novaSenha: '', confirmarSenha: '' });
-    } catch (error) {
+
+    } catch {
       setMensagem({ texto: 'Erro ao atualizar. Senha atual incorreta?', tipo: 'error' });
     }
   };
-  
+
   return (
-    <Box sx={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Typography variant="h4" sx={{ color: '#1a3d0a', fontWeight: 'bold', mb: 1 }}>
+    <Box
+      component="section"
+      aria-labelledby="titulo-minha-conta"
+      sx={{ maxWidth: 900, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 3 }}
+    >
+      <Typography
+        id="titulo-minha-conta"
+        variant="h4"
+        sx={{ color: '#1a3d0a', fontWeight: 'bold', mb: 1 }}
+      >
         Minha Conta
       </Typography>
 
       {/* CARD DE INFORMAÇÕES PESSOAIS */}
-      <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+      <Paper
+        component="article"
+        aria-label="Informações pessoais"
+        elevation={0}
+        sx={{ p: 4, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
           <Avatar sx={{ width: 80, height: 80, bgcolor: '#AED696', color: '#1a3d0a', fontSize: '2rem', fontWeight: 'bold' }}>
-            {usuario.nome.charAt(0)}
+            {nome.charAt(0)}
           </Avatar>
           <Box>
-            <Typography variant="h5" sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>{usuario.nome}</Typography>
+            <Typography variant="h5" sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>{nome}</Typography>
             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-              Perfil: {localStorage.getItem('tipoPerfil')}
+              Perfil: {perfil}
             </Typography>
           </Box>
         </Box>
@@ -71,27 +85,33 @@ export default function MinhaConta() {
         <Typography variant="h6" sx={{ color: '#2d5a27', fontWeight: 600, mb: 3 }}>
           Dados Pessoais
         </Typography>
-        
+
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <TextField fullWidth label="Nome Completo" value={usuario.nome} disabled variant="filled" />
+            <TextField fullWidth label="Nome Completo" value={nome}  disabled variant="filled" />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField fullWidth label="E-mail" value={usuario.email} disabled variant="filled" />
+            <TextField fullWidth label="E-mail"        value={email} disabled variant="filled" />
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField fullWidth label="CPF" value={usuario.cpf} disabled variant="filled" />
+            <TextField fullWidth label="CPF"           value={cpf}   disabled variant="filled" />
           </Grid>
         </Grid>
+
         <Typography variant="caption" sx={{ display: 'block', mt: 2, color: 'text.secondary' }}>
           * A edição de dados pessoais está desativada.
         </Typography>
       </Paper>
 
       {/* CARD DE ALTERAÇÃO DE SENHA */}
-      <Paper elevation={0} sx={{ p: 4, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+      <Paper
+        component="article"
+        aria-label="Segurança da conta"
+        elevation={0}
+        sx={{ p: 4, borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-          <LockResetIcon sx={{ color: '#2d5a27', fontSize: 32 }} />
+          <LockResetIcon sx={{ color: '#2d5a27', fontSize: 32 }} aria-hidden="true" />
           <Typography variant="h6" sx={{ color: '#2d5a27', fontWeight: 600 }}>
             Segurança da Conta
           </Typography>
@@ -104,54 +124,36 @@ export default function MinhaConta() {
         )}
 
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <TextField 
-              fullWidth 
-              type="password" 
-              label="Senha Atual" 
-              name="senhaAtual"
-              value={senhas.senhaAtual}
-              onChange={handleSenhaChange}
-              variant="outlined" 
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <TextField 
-              fullWidth 
-              type="password" 
-              label="Nova Senha" 
-              name="novaSenha"
-              value={senhas.novaSenha}
-              onChange={handleSenhaChange}
-              variant="outlined" 
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <TextField 
-              fullWidth 
-              type="password" 
-              label="Confirmar Nova Senha" 
-              name="confirmarSenha"
-              value={senhas.confirmarSenha}
-              onChange={handleSenhaChange}
-              variant="outlined" 
-            />
-          </Grid>
+          {[
+            { name: 'senhaAtual',       label: 'Senha Atual' },
+            { name: 'novaSenha',        label: 'Nova Senha' },
+            { name: 'confirmarSenha',   label: 'Confirmar Nova Senha' },
+          ].map(({ name, label }) => (
+            <Grid key={name} item xs={12} md={4}>
+              <TextField
+                fullWidth type="password"
+                label={label} name={name}
+                value={senhas[name]}
+                onChange={handleSenhaChange}
+                variant="outlined"
+              />
+            </Grid>
+          ))}
         </Grid>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             startIcon={<SaveIcon />}
             onClick={handleAtualizarSenha}
             disabled={!senhas.senhaAtual || !senhas.novaSenha || !senhas.confirmarSenha}
-            sx={{ 
-              bgcolor: '#2d5a27', 
-              px: 4, py: 1.2, 
+            sx={{
+              bgcolor: '#2d5a27',
+              px: 4, py: 1.2,
               borderRadius: '8px',
               textTransform: 'none',
               fontWeight: 'bold',
-              '&:hover': { bgcolor: '#1a3d0a' }
+              '&:hover': { bgcolor: '#1a3d0a' },
             }}
           >
             Atualizar Senha

@@ -24,18 +24,18 @@ const theme = createTheme({
   },
 });
 
-// Define as opções de navegação e os perfis do sistema
-const navLinks = ["Voltar ao Home", "Sobre nós", "Contato"];
+const NAV_LINKS = ["Voltar ao Home", "Sobre nós", "Contato"];
 
-const roles = [
+// Define os perfis disponíveis para seleção visual
+const PERFIS = [
   { id: "administrador", label: "Administrador" },
-  { id: "gestor",        label: "Gestor" },
-  { id: "cuidador",      label: "Cuidador" },
-  { id: "enfermeira",    label: "Enfermeira" },
-  { id: "familiar",      label: "Familiar" },
+  { id: "gestor",        label: "Gestor"        },
+  { id: "cuidador",      label: "Cuidador"      },
+  { id: "enfermeira",    label: "Enfermeira"    },
+  { id: "familiar",      label: "Familiar"      },
 ];
 
-// Desenha o ícone dinâmico do usuário
+// Ícone dinâmico de usuário — muda de cor conforme seleção
 function PersonIcon({ active }) {
   const color = active ? "#fff" : "#2d5a27";
   return (
@@ -47,15 +47,13 @@ function PersonIcon({ active }) {
 }
 
 export default function Login({ onLogin, onVoltar }) {
-  // Inicializa as credenciais e as configurações de tela
   const [selectedRole, setSelectedRole] = useState("gestor");
   const [credential, setCredential]     = useState("");
   const [password, setPassword]         = useState("");
   const [drawerOpen, setDrawerOpen]     = useState(false);
-  
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // Gerencia a navegação do menu lateral
   const handleNav = (link) => {
     setDrawerOpen(false);
     if (link === "Voltar ao Home" && onVoltar) onVoltar();
@@ -65,43 +63,40 @@ export default function Login({ onLogin, onVoltar }) {
   const handleLogin = async () => {
     try {
       // 1. Executa a autenticação inicial com e-mail e senha
-      const response = await axios.post("http://localhost:8080/auth/login", {
+      const { data: { token, tipoPerfil } } = await axios.post("http://localhost:8080/auth/login", {
         email: credential,
         senha: password,
       });
 
-      const { token, tipoPerfil } = response.data;
-
-      // 2. Busca os dados completos da lista de usuários usando o token obtido
-      const userDetailsRes = await axios.get("http://localhost:8080/usuarios", {
-        headers: { Authorization: `Bearer ${token}` }
+      // 2. Busca os dados completos do usuário usando o token obtido
+      const { data: listaUsuarios } = await axios.get("http://localhost:8080/usuarios", {
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       // 3. Filtra o usuário específico que acabou de logar
-      const usuarioLogado = userDetailsRes.data.find(
+      const usuarioLogado = listaUsuarios.find(
         (u) => u.email.toLowerCase() === credential.toLowerCase()
       );
 
-      if (usuarioLogado) {
-        // Monta o pacote consolidado de informações e envio para o App.js
-        const pacoteCompleto = {
-          token: token,
-          tipoPerfil: tipoPerfil,
-          asiloId: usuarioLogado.asilo?.id,
-          usuarioId: usuarioLogado.id,
-          nome: usuarioLogado.nome,
-          email: usuarioLogado.email,
-          cpf: usuarioLogado.cpf,
-        };
-        console.log("Pacote enviado para o App:", pacoteCompleto);
-        onLogin(pacoteCompleto);
-      } else {
+      if (!usuarioLogado) {
         alert("Erro ao recuperar perfil do usuário.");
+        return;
       }
+
+      // Monta o pacote consolidado de informações e envia para o App.js
+      const pacoteCompleto = {
+        token,
+        tipoPerfil,
+        asiloId:   usuarioLogado.asilo?.id,
+        usuarioId: usuarioLogado.id,
+        nome:      usuarioLogado.nome,
+        email:     usuarioLogado.email,
+        cpf:       usuarioLogado.cpf,
+      };
+      onLogin(pacoteCompleto);
 
     } catch (error) {
       console.error("Erro de autenticação:", error);
-      
       // Captura explicitamente o BadCredentialsException (401) do backend
       const msg = error.response?.data?.detail || error.response?.data?.message || "Verifique suas credenciais.";
       alert("Falha no login: " + msg);
@@ -110,39 +105,44 @@ export default function Login({ onLogin, onVoltar }) {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: "flex",
-        flexDirection: "column" }}>
-
-        {/* ── NAVBAR (padrão Home) ── */}
-        <AppBar position="sticky" sx={{ bgcolor: "#AED696", boxShadow: "none" }}>
+      <Box
+        component="main"
+        sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: "flex", flexDirection: "column" }}
+      >
+        {/* NAVBAR */}
+        <AppBar component="header" position="sticky" sx={{ bgcolor: "#AED696", boxShadow: "none" }}>
           <Toolbar sx={{ px: { xs: 2, md: 5 }, justifyContent: "space-between" }}>
             <Box component="img" src={logo} alt="MONSAI" sx={{ height: 40, objectFit: "contain" }} />
 
             {!isMobile && (
-              <Box sx={{ display: "flex", gap: 0.5 }}>
-                {navLinks.map((link) => (
-                  <Button key={link} onClick={() => handleNav(link)}
-                    sx={{ color: "#1a3d0a", fontWeight: 600, fontSize: "0.85rem",
-                      "&:hover": { bgcolor: "rgba(0,0,0,0.08)" } }}>
-                    {link}
-                  </Button>
-                ))}
-              </Box>
+              <nav>
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  {NAV_LINKS.map((link) => (
+                    <Button
+                      key={link}
+                      onClick={() => handleNav(link)}
+                      sx={{ color: "#1a3d0a", fontWeight: 600, fontSize: "0.85rem", "&:hover": { bgcolor: "rgba(0,0,0,0.08)" } }}
+                    >
+                      {link}
+                    </Button>
+                  ))}
+                </Box>
+              </nav>
             )}
 
             {isMobile && (
-              <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#1a3d0a" }}>
+              <IconButton onClick={() => setDrawerOpen(true)} aria-label="Abrir menu" sx={{ color: "#1a3d0a" }}>
                 <MenuIcon />
               </IconButton>
             )}
           </Toolbar>
         </AppBar>
 
-        {/* Mobile drawer */}
-        <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+        {/* MENU MOBILE */}
+        <Drawer component="nav" anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
           <Box sx={{ width: 220, pt: 2 }}>
             <List>
-              {navLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <ListItem key={link} disablePadding>
                   <ListItemButton onClick={() => handleNav(link)}>
                     <ListItemText primary={link} />
@@ -153,22 +153,23 @@ export default function Login({ onLogin, onVoltar }) {
           </Box>
         </Drawer>
 
-        {/* ── CONTEÚDO ── */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center", p: 2 }}>
-
+        {/* CONTEÚDO */}
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", p: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
 
             {/* Seletor de perfil */}
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {roles.map((role) => {
+            <Box component="aside" aria-label="Selecionar perfil" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              {PERFIS.map((role) => {
                 const active = selectedRole === role.id;
                 return (
-                  <Button key={role.id} onClick={() => setSelectedRole(role.id)}
+                  <Button
+                    key={role.id}
+                    onClick={() => setSelectedRole(role.id)}
                     variant="contained"
+                    aria-pressed={active}
                     sx={{
                       bgcolor: active ? "#2d5a27" : "#8ec86a",
-                      color: active ? "#fff" : "#1e3d1a",
+                      color:   active ? "#fff"     : "#1e3d1a",
                       flexDirection: "column", gap: 0.3,
                       width: 90, py: 1, borderRadius: "12px",
                       fontSize: "0.72rem", fontWeight: active ? 700 : 500,
@@ -176,7 +177,8 @@ export default function Login({ onLogin, onVoltar }) {
                       transform: active ? "scale(1.06)" : "scale(1)",
                       transition: "all 0.2s",
                       "&:hover": { bgcolor: active ? "#245020" : "#7db85c" },
-                    }}>
+                    }}
+                  >
                     <PersonIcon active={active} />
                     {role.label}
                   </Button>
@@ -185,60 +187,80 @@ export default function Login({ onLogin, onVoltar }) {
             </Box>
 
             {/* Card de login */}
-            <Paper elevation={0} sx={{
-              background: "linear-gradient(160deg, #a8d58a 0%, #4a8a3a 100%)",
-              borderRadius: "20px", p: "2rem 2.5rem", width: 320,
-              display: "flex", flexDirection: "column", gap: 2.5,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}>
-              <Typography variant="h4" sx={{ color: "#1a3a16", fontWeight: 700, textAlign: "left" }}>
+            <Paper
+              component="section"
+              aria-label="Formulário de login"
+              elevation={0}
+              sx={{
+                background: "linear-gradient(160deg, #a8d58a 0%, #4a8a3a 100%)",
+                borderRadius: "20px", p: "2rem 2.5rem", width: 320,
+                display: "flex", flexDirection: "column", gap: 2.5,
+                boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+              }}
+            >
+              <Typography variant="h4" component="h1" sx={{ color: "#1a3a16", fontWeight: 700, textAlign: "left" }}>
                 Login:
               </Typography>
 
               <Box>
-                <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1.1rem", mb: 0.8 }}>
+                <Typography component="label" htmlFor="campo-email" sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1.1rem", mb: 0.8, display: 'block' }}>
                   Email / CPF:
                 </Typography>
-                <TextField fullWidth variant="outlined" size="small"
-                  value={credential} onChange={(e) => setCredential(e.target.value)}
+                <TextField
+                  id="campo-email"
+                  fullWidth variant="outlined" size="small"
+                  value={credential}
+                  onChange={(e) => setCredential(e.target.value)}
                   autoComplete="username"
                   sx={{
                     bgcolor: "rgba(200,230,180,0.55)", borderRadius: "8px",
-                    "& .MuiOutlinedInput-root": { borderRadius: "8px",
-                      "& fieldset": { border: "none" } },
+                    "& .MuiOutlinedInput-root": { borderRadius: "8px", "& fieldset": { border: "none" } },
                     input: { color: "#1e3d1a" },
                   }}
                 />
               </Box>
 
               <Box>
-                <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1.1rem", mb: 0.8 }}>
+                <Typography component="label" htmlFor="campo-senha" sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1.1rem", mb: 0.8, display: 'block' }}>
                   Senha:
                 </Typography>
-                <TextField fullWidth variant="outlined" size="small" type="password"
-                  value={password} onChange={(e) => setPassword(e.target.value)}
+                <TextField
+                  id="campo-senha"
+                  fullWidth variant="outlined" size="small" type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
                   sx={{
                     bgcolor: "rgba(200,230,180,0.55)", borderRadius: "8px",
-                    "& .MuiOutlinedInput-root": { borderRadius: "8px",
-                      "& fieldset": { border: "none" } },
+                    "& .MuiOutlinedInput-root": { borderRadius: "8px", "& fieldset": { border: "none" } },
                     input: { color: "#1e3d1a" },
                   }}
                 />
               </Box>
 
               <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                <Button variant="contained" onClick={handleLogin}
+                <Button
+                  variant="contained"
+                  onClick={handleLogin}
                   sx={{
                     bgcolor: "#2d5a27", color: "#fff", borderRadius: "8px",
                     px: 4, py: 0.9, fontWeight: 700, fontSize: "0.95rem",
                     boxShadow: "0 4px 14px rgba(45,90,39,0.4)",
                     "&:hover": { bgcolor: "#1e3d1a" },
-                  }}>
+                  }}
+                >
                   Entrar
                 </Button>
-                <Typography sx={{ color: "#1a3a16", fontSize: "0.82rem", cursor: "pointer",
-                  textDecoration: "underline", opacity: 0.8, "&:hover": { opacity: 1 } }}>
+                <Typography
+                  component="button"
+                  onClick={() => {/* TODO: implementar recuperação de senha */}}
+                  sx={{
+                    color: "#1a3a16", fontSize: "0.82rem", cursor: "pointer",
+                    textDecoration: "underline", opacity: 0.8,
+                    background: "none", border: "none", p: 0,
+                    "&:hover": { opacity: 1 },
+                  }}
+                >
                   Recuperar senha?
                 </Typography>
               </Box>
