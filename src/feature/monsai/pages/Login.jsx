@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import logo from "../assets/Logo_nome.png";
+import logo from "assets/logos/Logo_nome.png";
 import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";

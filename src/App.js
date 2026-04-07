@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
-import MonitoramentoIoT from './components/MonitoramentoIoT';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Lojinha from './pages/Lojinha';
-import Pagamento from './pages/Pagamento';
-import RecuperarSenha from './pages/RecuperarSenha';
-import AlterarSenha from './pages/AlterarSenha';
-import { ToastProvider } from './components/ToastContext';
+import MonitoramentoIoT from './feature/monsai/components/MonitoramentoIoT'
+import Home from './feature/monsai/pages/Home';
+import Login from './feature/monsai/pages/Login';
+import Lojinha from './feature/monsai/pages/Lojinha';
+import Pagamento from './feature/monsai/pages/Pagamento';
+import RecuperarSenha from './feature/monsai/pages/RecuperarSenha';
+import AlterarSenha from './feature/monsai/pages/AlterarSenha';
+import { ToastProvider } from './feature/monsai/components/ToastContext';
 
 
 function App() {

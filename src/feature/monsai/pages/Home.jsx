@@ -1,7 +1,7 @@
 import { useState } from "react";
-import logo from "../assets/Logo_nome.png";
-import logoCompleta from "../assets/Logo_completa.png";
-import idosoFeliz from "../assets/idoso_feliz_2.png";
+import logo from "assets/logos/Logo_nome.png";
+import logoCompleta from "assets/logos/Logo_completa.png";
+import idosoFeliz from "assets/images/idoso_feliz_2.png";
 import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
