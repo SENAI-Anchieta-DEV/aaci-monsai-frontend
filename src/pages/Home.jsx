@@ -9,8 +9,14 @@ import {
   AppBar, Toolbar, Box, Button, Container, Typography, Grid,
   IconButton, Drawer, List, ListItem, ListItemButton, ListItemText,
   TextField, useMediaQuery,
+  Link,
 } from "@mui/material";
+import InstagramIcon from '@mui/icons-material/Instagram';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import YouTubeIcon from '@mui/icons-material/YouTube';
 import MenuIcon from "@mui/icons-material/Menu";
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneIcon from '@mui/icons-material/Phone';
 
 // ─── Tema MONSAI ─────────────────────────────────────────────────────────────
 const theme = createTheme({
@@ -257,78 +263,125 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
       </Box>
 
       {/* ── FOOTER ── */}
-      <Box component="footer" sx={{ bgcolor: "primary.main", color: "rgba(255,255,255,0.85)",
-        py: { xs: 4, md: 5 }, px: { xs: 2, md: 5 } }}>
-        <Grid container spacing={4} alignItems="flex-start" sx={{ maxWidth: 1000, mx: "auto", mb: 3 }}>
+      <Box 
+        component="footer" 
+        sx={{ 
+          bgcolor: "primary.light", 
+          color: "rgba(255,255,255,0.85)",
+          py: { xs: 6, md: 8 }, 
+          px: { xs: 2, md: 5 } 
+        }}
+      >
+        <Grid container spacing={5} alignItems="flex-start" sx={{ maxWidth: 1100, mx: "auto", mb: 4 }}>
 
-          <Grid item xs={12} md="auto">
-            <Box component="img" src={logo} alt="MONSAI"
-              sx={{ height: 36, objectFit: "contain", mb: 1.5, display: "block" }} />
-            <Box sx={{ display: "flex", gap: 1 }}>
-              {["📷", "🐦", "💼", "👥"].map((icon, i) => (
-                <Box key={i} sx={{
-                  width: 32, height: 32, borderRadius: 1.5,
-                  bgcolor: "rgba(255,255,255,0.12)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "pointer", fontSize: "1rem",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
-                }}>
-                  {icon}
+          {/* COLUNA 1: Logo, Descrição e Redes Sociais */}
+          <Grid item xs={12} md={4}>
+            <Box 
+              component="img" 
+              src={logo} 
+              alt="MONSAI"
+              sx={{ height: 40, objectFit: "contain", mb: 2, display: "block" }} 
+            />
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", mb: 3, maxWidth: 280, lineHeight: 1.6 }}>
+              Inovação que acompanha cada momento. Siga nossas redes para mais informações.
+            </Typography>
+            
+            <Box sx={{ display: "flex", gap: 1.5 }}>
+              {[InstagramIcon, YouTubeIcon, LinkedInIcon].map((Icon, i) => (
+                <Box 
+                  key={i} 
+                  sx={{
+                    width: 36, height: 36, borderRadius: 1.5,
+                    bgcolor: "rgba(255,255,255,0.08)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    cursor: "pointer", 
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": { 
+                      bgcolor: "rgba(255,255,255,0.2)",
+                      transform: "translateY(-2px)" // Efeito sutil de levantar ao passar o mouse
+                    },
+                  }}
+                >
+                  <Icon sx={{ fontSize: "1.2rem", color: "white" }} />
                 </Box>
               ))}
             </Box>
           </Grid>
 
-          <Grid item xs={12} md>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography>✉️</Typography>
+          {/* COLUNA 2: Contatos */}
+          <Grid item xs={12} md={4}>
+            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 2, letterSpacing: 0.5 }}>
+              Fale Conosco
+            </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <EmailIcon sx={{ color: "rgba(255,255,255,0.6)", fontSize: "1.3rem" }} />
                 <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
-                  email: monsai@gmail
+                  contato@monsai.com.br
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography>📞</Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                <PhoneIcon sx={{ color: "rgba(255,255,255,0.6)", fontSize: "1.3rem" }} />
                 <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
-                  Telefone: 11(XXX)31xxxx
+                  (11) 3199-9999
                 </Typography>
               </Box>
             </Box>
           </Grid>
 
+          {/* COLUNA 3: Newsletter */}
           <Grid item xs={12} md={4}>
-            <Typography variant="body2"
-              sx={{ color: "rgba(255,255,255,0.75)", fontWeight: 700, mb: 1, letterSpacing: 0.5 }}>
-              Email:
+            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 1, letterSpacing: 0.5 }}>
+              Newsletter
             </Typography>
-            <Box sx={{ display: "flex", borderRadius: 1, overflow: "hidden" }}>
-              <TextField size="small" variant="outlined" placeholder="seu@email.com"
-                value={email} onChange={(e) => setEmail(e.target.value)}
+            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", mb: 2 }}>
+              Receba atualizações e ofertas exclusivas no seu email.
+            </Typography>
+            
+            <Box sx={{ display: "flex", borderRadius: 1.5, overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+              <TextField 
+                size="small" 
+                variant="outlined" 
+                placeholder="seu@email.com"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
                 sx={{
                   flex: 1, bgcolor: "#fff",
-                  "& .MuiOutlinedInput-root": { borderRadius: 0,
-                    "& fieldset": { border: "none" } },
-                  input: { py: "9px", fontSize: "0.88rem" },
+                  "& .MuiOutlinedInput-root": { 
+                    borderRadius: 0,
+                    "& fieldset": { border: "none" } 
+                  },
+                  input: { py: "10px", fontSize: "0.9rem", color: "text.primary" },
                 }}
               />
-              <Button variant="contained" color="primary"
+              <Button 
+                variant="contained" 
                 onClick={handleEnviarEmail}
-                sx={{ borderRadius: 0, px: 2, fontSize: "0.8rem",
-                  bgcolor: "primary.dark", "&:hover": { bgcolor: "#0f2606" } }}>
-                Enviar
+                sx={{ 
+                  borderRadius: 0, 
+                  px: 3, 
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  bgcolor: "primary.dark", 
+                  "&:hover": { bgcolor: "#0f2606" } 
+                }}
+              >
+                Assinar
               </Button>
             </Box>
           </Grid>
 
         </Grid>
 
-        <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.15)", pt: 2, textAlign: "center" }}>
-          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.78rem" }}>
-            © 2024 MONSAI – Todos os direitos reservados.
+        {/* LINHA FINAL: Direitos Autorais */}
+        <Box sx={{ borderTop: "2px solid rgba(255,255,255,0.1)", pt: 3, mt: 2, textAlign: "center" }}>
+          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>
+            © {new Date().getFullYear()} MONSAI – Todos os direitos reservados.
           </Typography>
         </Box>
       </Box>
 
-    </ThemeProvider>
+          </ThemeProvider>
   );
 }

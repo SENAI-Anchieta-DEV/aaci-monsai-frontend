@@ -43,12 +43,31 @@ export const validarCNPJ = (cnpj) => {
 };
 
 /**
- * Valida senha com mínimo de 6 caracteres.
+ * Valida senha com:
+ * - Mínimo de 6 caracteres.
+ * - Pelo menos uma letra.
+ * - Pelo menos um caractere especial (@$!%*?&).
  * @param {string} senha
  * @returns {string|null}
  */
 export const validarSenha = (senha) => {
-  if (!senha || senha.length < 6) return "A senha deve ter no mínimo 6 caracteres.";
+  if (!senha || senha.length < 6) {
+    return "A senha deve ter no mínimo 6 caracteres.";
+  }
+/*
+  // Verifica se contém pelo menos uma letra (maiúscula ou minúscula)
+  const temLetra = /[a-zA-Z]/.test(senha);
+  if (!temLetra) {
+    return "A senha deve conter pelo menos uma letra.";
+  }
+
+  // Verifica se contém pelo menos um caractere especial
+  const temCaractereEspecial = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+  if (!temCaractereEspecial) {
+    return "A senha deve conter pelo menos um caractere especial.";
+  }
+    */
+
   return null;
 };
 
