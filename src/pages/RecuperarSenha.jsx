@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
-import logo from "../assets/Logo_nome.png";
+import logo from "../assets/logos/Logo_nome.png";
 import { useToast } from "../components/ToastContext";
 
 // ─── TEMA (O mesmo do Login) ──────────────────────────────────────────────────
