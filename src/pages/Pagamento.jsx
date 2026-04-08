@@ -9,6 +9,7 @@ import {
   ListItemButton, ListItemText, useMediaQuery, Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { mascararCPF, mascararCartao, mascararValidade, mascararCVV, mascararCEP } from '../utils/masks';
 
 const theme = createTheme({
   palette: {
@@ -213,7 +214,7 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
   });
 
   const preco = 499.99;
-  const frete = form.cep.length >= 8 ? 51.00 : null;
+  const frete = form.cep.length >= 9 ? 51.00 : null; 
   const total = frete ? (preco * qty + frete).toFixed(2) : null;
 
   const handleNav = (link) => {
@@ -222,7 +223,16 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
     if (link === "Sou Cliente")   onVoltar?.();
   };
 
-  const setField = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const setField = (field) => (e) => {
+    let value = e.target.value;
+    if (field === "cpf") value = mascararCPF(value);
+    else if (field === "cartao") value = mascararCartao(value);
+    else if (field === "validade") value = mascararValidade(value);
+    else if (field === "cvv") value = mascararCVV(value);
+    else if (field === "cep") value = mascararCEP(value);
+
+    setForm((f) => ({ ...f, [field]: value }));
+  };
 
   const handleCopiar = (texto, label) => {
     navigator.clipboard.writeText(texto);
