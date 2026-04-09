@@ -35,6 +35,7 @@ export default function Monitoramento() {
 
   // Apenas Gestores podem editar e excluir idosos
   const podeEditar = perfil === 'GESTOR' || perfil === 'ROLE_GESTOR';
+  
 
   // ─── Busca de idosos (dinâmica por perfil) ───────────────────────────────
   const fetchIdosos = async () => {
