@@ -42,7 +42,6 @@ const theme = createTheme({
   },
 });
 
-const navLinks = ["Solicitar adesão", "Sou Cliente", "Sobre nós", "Contato"];
 
 function ImgPlaceholder({ label, height = 200 }) {
   return (
@@ -84,46 +83,6 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
 
   return (
     <ThemeProvider theme={theme}>
-
-      {/* ── NAVBAR ── */}
-      <AppBar position="sticky" sx={{ bgcolor: "#AED696", boxShadow: "none" }}>
-        <Toolbar sx={{ px: { xs: 2, md: 5 }, justifyContent: "space-between" }}>
-          <Box component="img" src={logo} alt="MONSAI" sx={{ height: 40, objectFit: "contain" }} />
-
-          {!isMobile && (
-            <Box sx={{ display: "flex", gap: 0.5 }}>
-              {navLinks.map((link) => (
-                <Button key={link} onClick={() => handleNav(link)}
-                  sx={{ color: "#1a3d0a", fontWeight: 600, fontSize: "0.85rem",
-                    "&:hover": { bgcolor: "rgba(0,0,0,0.08)" } }}>
-                  {link}
-                </Button>
-              ))}
-            </Box>
-          )}
-
-          {isMobile && (
-            <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#1a3d0a" }}>
-              <MenuIcon />
-            </IconButton>
-          )}
-        </Toolbar>
-      </AppBar>
-
-      {/* Mobile drawer */}
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 220, pt: 2 }}>
-          <List>
-            {navLinks.map((link) => (
-              <ListItem key={link} disablePadding>
-                <ListItemButton onClick={() => handleNav(link)}>
-                  <ListItemText primary={link} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
 
       {/* ── HERO ── */}
       <Box sx={{
@@ -213,7 +172,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
       </Container>
 
       {/* ── EQUIPE ── */}
-      <Box sx={{ bgcolor: "background.paper", py: { xs: 5, md: 7 } }}>
+      <Box id="sobre-nos" sx={{ bgcolor: "background.paper", py: { xs: 5, md: 7 } }}>
         <Container maxWidth="lg">
           <Typography variant="h5" sx={{ mb: 4 }}>Conheça a equipe:</Typography>
 
@@ -264,7 +223,8 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
 
       {/* ── FOOTER ── */}
       <Box 
-        component="footer" 
+        component="footer"
+        id="contato" 
         sx={{ 
           bgcolor: "primary.light", 
           color: "rgba(255,255,255,0.85)",

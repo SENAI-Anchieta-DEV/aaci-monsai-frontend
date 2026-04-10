@@ -11,9 +11,9 @@ import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
 import Dashboard from './components/Dashboard';
 import AdminSetup from './components/AdminSetup';
+import Navbar from './components/Navbar'; //
 import { ToastProvider } from './components/ToastContext';
 
-// Rotas do sistema para evitar erros de digitação e facilitar manutenção
 const SCREENS = {
   HOME: 'home',
   LOGIN: 'login',
@@ -26,12 +26,11 @@ const SCREENS = {
 };
 
 function App() {
-  // Inicializa os controladores principais de navegação e permissão
   const [currentScreen, setCurrentScreen] = useState(SCREENS.HOME);
   const [auth, setAuth] = useState({ isAuth: false, perfil: '', asiloId: null });
   const [qty, setQty] = useState(1);
 
-const applyAuth = useCallback((token, perfil, asiloId) => {
+  const applyAuth = useCallback((token, perfil, asiloId) => {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     setAuth({ isAuth: true, perfil, asiloId }); 
     
@@ -52,30 +51,25 @@ const applyAuth = useCallback((token, perfil, asiloId) => {
     }
   }, [applyAuth]);
 
-
-  // 3. Processa e persiste os dados recebidos após um login bem-sucedido
   const handleLoginSuccess = (dados) => {
-  localStorage.setItem('token', dados.token);
-  localStorage.setItem('tipoPerfil', dados.tipoPerfil);
-  localStorage.setItem('usuarioId', dados.usuarioId);
-  localStorage.setItem('nomeUsuario', dados.nome);
-  
-  localStorage.setItem('emailUsuario', dados.email || '');
-  localStorage.setItem('cpfUsuario', dados.cpf || '');
-  
-  localStorage.setItem('asiloId', dados.asilo?.id || dados.asiloId);
-  
-  applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
-};
+    localStorage.setItem('token', dados.token);
+    localStorage.setItem('tipoPerfil', dados.tipoPerfil);
+    localStorage.setItem('usuarioId', dados.usuarioId);
+    localStorage.setItem('nomeUsuario', dados.nome);
+    localStorage.setItem('emailUsuario', dados.email || '');
+    localStorage.setItem('cpfUsuario', dados.cpf || '');
+    localStorage.setItem('asiloId', dados.asilo?.id || dados.asiloId);
+    
+    applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
+  };
 
-  // Revoga os acessos e limpa o estado da aplicação
   const handleLogout = () => {
     localStorage.clear(); 
     delete axios.defaults.headers.common['Authorization'];
     setAuth({ isAuth: false, perfil: '' });
     setCurrentScreen(SCREENS.HOME);
   };
-  // 4. Decide qual componente renderizar com base no estado 'currentScreen'
+
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
@@ -115,9 +109,16 @@ const applyAuth = useCallback((token, perfil, asiloId) => {
         return <Home onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} />;
     }
   };
+
   return (
     <ToastProvider>
       <div className="App">
+        {/* A Navbar inserida no topo de forma global */}
+        <Navbar 
+          onNavigate={(tela) => setCurrentScreen(tela)} 
+          currentScreen={currentScreen} 
+        />
+        
         {renderContent()}
       </div>
     </ToastProvider>

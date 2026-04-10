@@ -278,44 +278,6 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
     <ThemeProvider theme={theme}>
       <Box sx={{ minHeight: "100vh", bgcolor: "#ffffff", display: "flex", flexDirection: "column" }}>
 
-        {/* ── NAVBAR ── */}
-        <AppBar position="sticky" sx={{ bgcolor: "#AED696", boxShadow: "none" }}>
-          <Toolbar sx={{ px: { xs: 2, md: 5 }, justifyContent: "space-between" }}>
-            <Box component="img" src={logo} alt="MONSAI" sx={{ height: 40, objectFit: "contain" }} />
-            {!isMobile && (
-              <Box sx={{ display: "flex", gap: 0.5 }}>
-                {navLinks.map((link) => (
-                  <Button key={link} onClick={() => handleNav(link)}
-                    sx={{ color: "#1a3d0a", fontWeight: 600, fontSize: "0.85rem",
-                      "&:hover": { bgcolor: "rgba(0,0,0,0.08)" } }}>
-                    {link}
-                  </Button>
-                ))}
-              </Box>
-            )}
-            {isMobile && (
-              <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#1a3d0a" }}>
-                <MenuIcon />
-              </IconButton>
-            )}
-          </Toolbar>
-        </AppBar>
-
-        {/* Mobile drawer */}
-        <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-          <Box sx={{ width: 220, pt: 2 }}>
-            <List>
-              {navLinks.map((link) => (
-                <ListItem key={link} disablePadding>
-                  <ListItemButton onClick={() => handleNav(link)}>
-                    <ListItemText primary={link} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        </Drawer>
-
         {/* ── CONTEÚDO ── */}
         <Box sx={{ flex: 1, display: "flex", alignItems: "center",
           justifyContent: "center", p: { xs: 2, md: 4 } }}>
