@@ -168,7 +168,7 @@ Este frontend faz parte do ecossistema:
 
 <p align="center">
   Allan Leal da Luz<br>
-  André Mendes Godek<br>
+  André Gondek Mendes<br>
   Christian Soares Maia<br>
   Izabella Carolina Hermano Alves
 </p>
