@@ -55,7 +55,7 @@ Antes de rodar o projeto:
 ### 🔽 Clone
 
 ```bash
-git clone https://github.com/seu-org/aaci-monsai-frontend.git
+git clone https://github.com/SENAI-Anchieta-DEV/aaci-monsai-frontend.git
 cd aaci-monsai-frontend
 ```
 
