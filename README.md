@@ -59,20 +59,6 @@ git clone https://github.com/seu-org/aaci-monsai-frontend.git
 cd aaci-monsai-frontend
 ```
 
----
-
-## 🔐 Configuração do Ambiente
-
-Crie um arquivo `.env` na raiz:
-
-```env
-REACT_APP_API_URL=http://localhost:8080
-```
-
-⚠️ Variáveis no React **devem começar com `REACT_APP_`**
-
----
-
 ## 🚀 Execução
 
 ```bash
