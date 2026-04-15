@@ -46,7 +46,7 @@ Antes de rodar o projeto:
 
 * 🟢 Node.js 18+
 * 📦 npm 9+
-* 🌿 Backend Monsai rodando em `http://localhost:8080`
+* 🌿 Backend Monsai rodando em `http://localhost:8080 || https://aaci-monsai-backend-mrxp.onrender.com/`
 
 ---
 
@@ -124,7 +124,7 @@ npm run build
 ### Configurar produção:
 
 ```env
-REACT_APP_API_URL=https://api.seudominio.com
+REACT_APP_API_URL=https://aaci-monsai-frontend.firebaseapp.com/
 ```
 
 ---
@@ -142,7 +142,7 @@ Este frontend faz parte do ecossistema:
 
 ## 📌 Status
 
-🚧 Em desenvolvimento contínuo
+🚧 Em desenvolvimento
 
 ---
 
