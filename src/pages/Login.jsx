@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useToast } from "../components/ToastContext";
-
+import api from "../utils/api";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
   Box, Button, TextField, Typography, Paper
@@ -57,39 +57,52 @@ export default function Login({ onLogin, onRecuperar }) {
 
   const showToast = useToast();
 
-  const handleLogin = async () => {
+    const handleLogin = async () => {
     if (!credential || !password) {
       showToast({ type: "error", title: "Campos vazios", message: "Preencha email e senha." });
       return;
     }
     setLoading(true);
     try {
-      const { data: { token, tipoPerfil } } = await axios.post("http://localhost:8080/auth/login", {
+      // ✅ PASSO 1 — POST /auth/login → recebe token
+      const { data: authData } = await api.post("/auth/login", {
         email: credential,
         senha: password,
       });
-
-      const { data: listaUsuarios } = await axios.get("http://localhost:8080/usuarios", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+ 
+      const token = authData.accessToken || authData.token;
+ 
+      // Salva o token antes de fazer a próxima chamada
+      localStorage.setItem("token", token);
+ 
+      // ✅ PASSO 2 — GET /usuarios → acha os dados completos do usuário logado
+      const { data: listaUsuarios } = await api.get("/usuarios");
       const usuarioLogado = listaUsuarios.find(
         (u) => u.email.toLowerCase() === credential.toLowerCase()
       );
-
+ 
       if (!usuarioLogado) {
         showToast({ type: "error", title: "Erro de Perfil", message: "Não encontramos seus dados de acesso." });
+        localStorage.removeItem("token");
         return;
       }
-
+ 
+      // ✅ PASSO 3 — Salva tudo no localStorage para uso global
+      localStorage.setItem("token",       token);
+      localStorage.setItem("tipoPerfil",  authData.tipoPerfil || usuarioLogado.tipoUsuario || "");
+      localStorage.setItem("usuarioId",   usuarioLogado.id    || usuarioLogado.usuarioId || "");
+      localStorage.setItem("asiloId",     usuarioLogado.asilo?.id || "");
+      localStorage.setItem("nomeUsuario", usuarioLogado.nome  || "");
+      localStorage.setItem("emailUsuario",usuarioLogado.email || "");
+      localStorage.setItem("cpfUsuario",  usuarioLogado.cpf   || "");
+ 
       showToast({ type: "success", title: "Bem-vindo!", message: `Olá, ${usuarioLogado.nome}!` });
-      onLogin({ 
-        token, tipoPerfil, asiloId: usuarioLogado.asilo?.id, usuarioId: usuarioLogado.id,
-        nome: usuarioLogado.nome, email: usuarioLogado.email, cpf: usuarioLogado.cpf 
-      });
-
+      onLogin();
+ 
     } catch (error) {
-      const msg = error.response?.data?.message || "Email ou senha incorretos.";
+      localStorage.removeItem("token");
+
+      const msg = error.response?.data?.message || error.response?.data?.detail || "Email ou senha incorretos.";
       showToast({ type: "error", title: "Falha no Login", message: msg });
     } finally {
       setLoading(false);

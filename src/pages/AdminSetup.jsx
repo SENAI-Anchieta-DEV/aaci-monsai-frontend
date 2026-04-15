@@ -129,4 +129,4 @@ export default function OnBoardingAdmin({ onFinish, onLogout }) {
       </Container>
     </Box>
   );
-}
+} 
