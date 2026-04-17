@@ -10,19 +10,27 @@ const HistoricoAlertas = () => {
     const [abaAtual, setAbaAtual] = useState(0);
     const [alertas, setAlertas] = useState([]);
 
-    // 1. Buscar Histórico Inicial do Backend
-    useEffect(() => {
-        const carregarHistorico = async () => {
-            try {
-                // Substitua '/alertas' pela rota real do seu backend
-                const response = await api.get('/alertas');
-                setAlertas(response.data);
-            } catch (error) {
-                console.error("Erro ao buscar histórico de alertas:", error);
-            }
-        };
-        carregarHistorico();
-    }, []);
+   // 1. Buscar Histórico do Cache em Tempo Real
+useEffect(() => {
+    const carregarAlertas = async () => {
+        try {
+            // USANDO O NOVO ENDPOINT QUE DEVOLVE OBJETOS REAIS
+            const response = await api.get('/api/telemetria/alertas-recentes');
+            setAlertas(response.data);
+        } catch (error) {
+            console.error("Erro ao sincronizar alertas recentes:", error);
+        }
+    };
+
+    // Busca assim que a tela abre
+    carregarAlertas();
+
+    // Configura o Polling para atualizar a cada 5 segundos
+    const intervalId = setInterval(carregarAlertas, 5000);
+
+    // Limpa o intervalo se o enfermeiro mudar de página
+    return () => clearInterval(intervalId);
+}, []);
 
     // 2. Conexão WebSocket para receber alertas na mesma hora
     useEffect(() => {
@@ -44,30 +52,29 @@ const HistoricoAlertas = () => {
     }, []);
 
     // 3. Regra dos 10 Minutos (Move automaticamente para aba "Antigos")
-    useEffect(() => {
-        const intervalId = setInterval(() => {
-            const agora = new Date().getTime();
-            
-            setAlertas(prevAlertas => prevAlertas.map(alerta => {
-                if (!alerta.visto) {
-                    const tempoAlerta = new Date(alerta.data).getTime(); // ou alerta.dataHora dependendo do seu DTO
-                    const diferencaMinutos = (agora - tempoAlerta) / (1000 * 60);
+   const agora = new Date().getTime();
 
-                    // Se passou de 10 minutos, marca como visto automaticamente
-                    if (diferencaMinutos >= 10) {
-                        // Opcional: Aqui você pode dar um api.put(`/alertas/${alerta.id}/visto`) para syncar com o BD
-                        return { ...alerta, visto: true };
-                    }
-                }
-                return alerta;
-            }));
-        }, 60000); // Roda a verificação a cada 1 minuto
+    // Filtra os Novos: Só entra se NÃO foi visto E tem menos de 10 minutos
+    const novosAlertas = alertas.filter(alerta => {
+        if (alerta.visto) return false; 
+        
+        const tempoAlerta = new Date(alerta.data).getTime();
+        const minutosPassados = (agora - tempoAlerta) / (1000 * 60);
+        
+        return minutosPassados < 10;
+    });
 
-        return () => clearInterval(intervalId);
-    }, []);
+    // Filtra os Antigos: Entra se JÁ foi visto OU tem 10 minutos ou mais
+    const alertasAntigos = alertas.filter(alerta => {
+        if (alerta.visto) return true;
+        
+        const tempoAlerta = new Date(alerta.data).getTime();
+        const minutosPassados = (agora - tempoAlerta) / (1000 * 60);
+        
+        return minutosPassados >= 10;
+    });
 
-    const novosAlertas = alertas.filter(a => !a.visto);
-    const alertasAntigos = alertas.filter(a => a.visto);
+
 
     const handleMudancaAba = (event, novoValor) => setAbaAtual(novoValor);
 
