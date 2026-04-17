@@ -18,6 +18,7 @@ import CadastrarIdoso   from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import MinhaConta       from './MinhaConta';
 import { useAuth }      from '../hooks/useAuth';
+import HistoricoAlertas from './HistoricoAlertas';
 
 // ─── Configuração do menu com controle de acesso por perfil ──────────────────
 const MENU_ITEMS = [
@@ -77,7 +78,7 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     minha_conta:      <MinhaConta />,
     localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
-    historico_alertas: <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>,
+    historico_alertas: <HistoricoAlertas />
   };
 
   return telas[telaAtiva]
