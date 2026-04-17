@@ -6,6 +6,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/logos/Logo_nome.png";
 import { useToast } from "../components/ToastContext";
+import api from "utils/api";
 
 const theme = createTheme({
   palette: {
@@ -21,6 +22,12 @@ export default function AlterarSenha({ onSucesso, onVoltar }) {
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [loading, setLoading]               = useState(false);
   const showToast = useToast();
+  const validarSenha = (senha) => {
+  if (!senha) return "A senha não pode estar vazia.";
+  if (senha.length < 6) return "A senha deve ter pelo menos 6 caracteres.";
+  // Se quiser ser mais rigoroso, pode adicionar regras de números/símbolos aqui
+  return null; // Retorna null se estiver tudo ok
+};
  
   const handleFinalizar = async () => {
     const erroSenha = validarSenha(novaSenha);
