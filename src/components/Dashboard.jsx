@@ -78,7 +78,7 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     minha_conta:      <MinhaConta />,
     localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
-    historico_alertas: <HistoricoAlertas />
+    historico_alertas: <HistoricoAlertas asiloId={asiloId} />,
   };
 
   return telas[telaAtiva]
