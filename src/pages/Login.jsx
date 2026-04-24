@@ -6,6 +6,14 @@ import {
   Box, Button, TextField, Typography, Paper
 } from "@mui/material";
 
+function parseJwt(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch {
+    return {};
+  }
+}
+
 const theme = createTheme({
   palette: {
     primary:   { main: "#2a5c14", dark: "#1a3d0a", light: "#7ec44f" },
@@ -70,25 +78,20 @@ export default function Login({ onLogin, onRecuperar }) {
         senha: password,
       });
 
+       // ✅ PASSO 2 — substitui o GET /auth/me por isso:
       const token = authData.accessToken || authData.token;
-      localStorage.setItem("token", token);
+      const payload = parseJwt(token);
 
-      // ✅ PASSO 2 — GET /auth/me → funciona para TODOS os perfis, inclusive SUPER_ADMIN
-      // Evita o problema de SUPER_ADMIN não estar na lista de /usuarios
-      const { data: me } = await api.get("/auth/me");
-
-      // ✅ PASSO 3 — Salva tudo no localStorage para uso global via useAuth()
       localStorage.setItem("token",        token);
-      localStorage.setItem("tipoPerfil",   me.tipoUsuario  || me.role         || authData.tipoPerfil || "");
-      localStorage.setItem("usuarioId",    me.id           || me.usuarioId    || "");
-      localStorage.setItem("asiloId",      me.asilo?.id    || me.asiloId      || "");
-      localStorage.setItem("nomeUsuario",  me.nome         || me.name         || "");
-      localStorage.setItem("emailUsuario", me.email        || "");
-      localStorage.setItem("cpfUsuario",   me.cpf          || "");
+      localStorage.setItem("tipoPerfil",   payload.tipoUsuario  || payload.role     || authData.tipoPerfil || "");
+      localStorage.setItem("usuarioId",    payload.sub          || payload.id       || "");
+      localStorage.setItem("asiloId",      payload.asiloId      || authData.asiloId || "");
+      localStorage.setItem("nomeUsuario",  payload.nome         || payload.name     || "");
+      localStorage.setItem("emailUsuario", payload.email        || "");
+      localStorage.setItem("cpfUsuario",   payload.cpf          || "");
 
-      showToast({ type: "success", title: "Bem-vindo!", message: `Olá, ${me.nome || me.name}!` });
+      showToast({ type: "success", title: "Bem-vindo!", message: `Olá, ${payload.nome || payload.name || "usuário"}!` });
       onLogin();
-
     } catch (error) {
       localStorage.removeItem("token");
       const msg = error.response?.data?.message

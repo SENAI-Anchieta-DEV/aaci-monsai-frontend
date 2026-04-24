@@ -51,17 +51,12 @@ function App() {
     }
   }, [applyAuth]);
 
-  const handleLoginSuccess = (dados) => {
-    localStorage.setItem('token', dados.token);
-    localStorage.setItem('tipoPerfil', dados.tipoPerfil);
-    localStorage.setItem('usuarioId', dados.usuarioId);
-    localStorage.setItem('nomeUsuario', dados.nome);
-    localStorage.setItem('emailUsuario', dados.email || '');
-    localStorage.setItem('cpfUsuario', dados.cpf || '');
-    localStorage.setItem('asiloId', dados.asilo?.id || dados.asiloId);
-    
-    applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
-  };
+  const handleLoginSuccess = () => {
+  const token   = localStorage.getItem('token');
+  const perfil  = localStorage.getItem('tipoPerfil');
+  const asiloId = localStorage.getItem('asiloId');
+  applyAuth(token, perfil, asiloId);
+};
 
   const handleLogout = () => {
     localStorage.clear(); 
