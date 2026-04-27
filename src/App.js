@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
 import './App.css'; 
 
@@ -11,7 +12,8 @@ import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
-import Navbar from './components/Navbar'; //
+import Navbar from './components/Navbar';
+import theme from './components/createTheme';
 import { ToastProvider } from './components/ToastContext';
 
 const SCREENS = {
@@ -68,7 +70,8 @@ function App() {
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
-        return <AdminSetup onFinish={handleLogout} onLogout={handleLogout} />;
+        return <AdminSetup onFinish={() => setCurrentScreen(SCREENS.DASHBOARD)} 
+            onLogout={() => setCurrentScreen(SCREENS.DASHBOARD)}/>;
       
       case SCREENS.DASHBOARD:
         return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogout} />;
@@ -106,6 +109,8 @@ function App() {
   };
 
   return (
+    <ThemeProvider theme={theme}>
+    <CssBaseline />
     <ToastProvider>
       <div className="App">
         {/* A Navbar inserida no topo de forma global */}
@@ -117,6 +122,7 @@ function App() {
         {renderContent()}
       </div>
     </ToastProvider>
+    </ThemeProvider>
   );
 }
 

@@ -25,46 +25,47 @@ const MENU_ITEMS = [
     id: 'monitoramento',
     label: 'Monitoramento',
     icon: <MonitorHeartIcon />,
-    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'],
+    // Adicionado SUPER_ADMIN
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR', 'SUPER_ADMIN'], 
   },
   {
     id: 'cadastrar',
     label: 'Cadastrar Usuário',
     icon: <PersonAddIcon />,
-    perfisPermitidos: ['GESTOR'],
+    perfisPermitidos: ['GESTOR', 'SUPER_ADMIN'], 
   },
   {
     id: 'gerenciar',
     label: 'Gerenciar Usuários',
     icon: <ManageAccountsIcon />,
-    perfisPermitidos: ['GESTOR'],
+    perfisPermitidos: ['GESTOR', 'SUPER_ADMIN'],
   },
   {
     id: 'cadastrar_idoso',
     label: 'Cadastrar Idoso',
     icon: <ElderlyIcon />,
-    perfisPermitidos: ['GESTOR', 'CUIDADOR'],
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'SUPER_ADMIN'],
   },
   {
     id: 'localizar',
     label: 'Localizar Idoso',
     icon: <LocationOnIcon />,
-    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'],
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR', 'SUPER_ADMIN'],
   },
   {
     id: 'historico_alertas',
     label: 'Histórico de Alertas',
     icon: <ReportProblemIcon />,
-    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO'],
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN'],
   },
 ];
-
 // ─── Labels de perfil para o título do painel ────────────────────────────────
 const LABEL_PERFIL = {
   GESTOR:    'Gestor',
   CUIDADOR:  'Cuidador',
   ENFERMEIRO: 'Enfermeiro',
   FAMILIAR:  'Familiar',
+  SUPER_ADMIN: 'Admin',
 };
 
 // ─── Telas disponíveis por ID ─────────────────────────────────────────────────

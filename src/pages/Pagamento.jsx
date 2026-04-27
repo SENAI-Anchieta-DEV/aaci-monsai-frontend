@@ -255,7 +255,7 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ minHeight: "100vh", bgcolor: "#ffffff", display: "flex", flexDirection: "column" }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: "flex", flexDirection: "column" }}>
 
         {/* ── CONTEÚDO ── */}
         <Box sx={{ flex: 1, display: "flex", alignItems: "center",
