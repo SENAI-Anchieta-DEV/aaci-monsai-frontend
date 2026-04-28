@@ -37,11 +37,15 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-    const idAsilo = Number(asiloId);
-    if (!idAsilo) {
-      showToast({ type: "error", title: "Sessão inválida", message: "ID do asilo inválido. Faça login novamente." });
-      return;
-    }
+   const idAsilo = Number(asiloId || localStorage.getItem("asiloId"));
+  if (!idAsilo) {
+    showToast({ 
+      type: "error", 
+      title: "Erro de Vínculo", 
+      message: "Não foi possível identificar o seu asilo. Tente deslogar e logar novamente." 
+    });
+    return;
+  }
 
     setLoading(true);
     try {

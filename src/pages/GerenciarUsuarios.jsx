@@ -160,7 +160,7 @@ export default function GerenciarUsuarios({ asiloId }) {
     }
     const idAlvo = resolverIdUsuario(usuarioSelecionado);
     try {
-      await api.patch(`/usuarios/${idAlvo}/senha`, { novaSenha });
+      await api.patch(`/usuarios/${idAlvo}/senha`, { senha: novaSenha });
       setModalSenhaAberto(false);
       showToast({ type: "success", title: "Senha atualizada!", message: `Senha de ${usuarioSelecionado.nome} atualizada.` });
     } catch (err) {

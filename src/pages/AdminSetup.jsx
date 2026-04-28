@@ -26,7 +26,7 @@ export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
 
     try {
       await api.post("/usuarios", { ...gestor, tipoUsuario: "GESTOR", asiloId });
-      showToast({ type: "success", title: "Configuração concluída!", message: "Faça login novamente para continuar." });
+      showToast({ type: "success", title: "Configuração concluída!", message: "A criação do gerente e do asilo foi bem-sucedida." });
       if (onFinish) onFinish();
     } catch (error) {
       console.error("Erro na requisição:", error.response?.data || error.message);
