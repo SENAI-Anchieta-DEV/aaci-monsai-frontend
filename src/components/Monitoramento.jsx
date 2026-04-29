@@ -16,6 +16,8 @@ import api               from '../utils/api';
 import { useAuth }       from '../hooks/useAuth';
 import { validarNome, validarCPF, validarEmail, coletarErros } from '../utils/validators';
 import { mascararCPF }   from '../utils/masks';
+import LightbulbCircleIcon from '@mui/icons-material/LightbulbCircle';
+import { Tooltip } from '@mui/material';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -169,6 +171,20 @@ export default function Monitoramento() {
   });
 
   // ─── Ações ────────────────────────────────────────────────────────────────
+  const handleTestarPulseira = async (idosoNome, serial) => {
+    // ATENÇÃO: Para a apresentação, colocamos o IP fixo que o ESP32 pegar no Wi-Fi.
+    // Olhe no monitor serial do Arduino qual IP o ESP32 pegou (ex: 192.168.137.X)
+    // e substitua aqui. Em um cenário real, isso passaria pelo MQTT do Backend.
+    const IP_DO_ESP32 = "192.168.137.232"; 
+    
+    try {
+      await api.post(`/api/telemetria/comando-led/${serial}`);
+      alert(`Sinal enviado com sucesso para a pulseira de ${idosoNome}! O LED deve acender.`);
+    } catch (err) {
+      alert(`Erro: Não foi possível alcançar a pulseira no IP ${IP_DO_ESP32}. Verifique se ela está na mesma rede.`);
+    }
+  };
+  
   const handleDelete = async (id, nome) => {
     if (!podeEditar) {
       alert("Erro: você não tem permissão para inativar idosos.");
@@ -388,56 +404,62 @@ export default function Monitoramento() {
                     />
                   </Box>
 
-                  {/* Bateria + Movimento + Ações */}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      {/* Status de Movimento */}
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <DirectionsRunIcon
-                          sx={{ mr: 0.5, fontSize: 18, color: corMovimento(dados.acelerometro) }}
-                          aria-hidden="true"
-                        />
-                        <Typography
-                          variant="body2" fontWeight="bold"
-                          sx={{ color: corMovimento(dados.acelerometro), fontSize: '0.75rem' }}
-                        >
-                          {dados.acelerometro || "Normal"}
-                        </Typography>
-                      </Box>
+                 {/* Bateria + Movimento + Ações */}
+<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+  
+  {/* LADO ESQUERDO: Grupo de Status (Movimento e Bateria) */}
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+      <DirectionsRunIcon
+        sx={{ mr: 0.5, fontSize: 18, color: corMovimento(dados.acelerometro) }}
+      />
+      <Typography variant="body2" fontWeight="bold" sx={{ color: corMovimento(dados.acelerometro), fontSize: '0.75rem' }}>
+        {dados.acelerometro || "Normal"}
+      </Typography>
+    </Box>
 
-                      {/* Bateria */}
-                      {dados.bateria !== undefined && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <BatteryChargingFullIcon
-                            sx={{ fontSize: 18, color: corBateria(dados.bateria), mr: 0.3 }}
-                          />
-                          <Typography
-                            variant="caption"
-                            sx={{ color: corBateria(dados.bateria), fontWeight: 600 }}
-                          >
-                            {dados.bateria}%
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
+    {dados.bateria !== undefined && (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <BatteryChargingFullIcon sx={{ fontSize: 18, color: corBateria(dados.bateria), mr: 0.3 }} />
+        <Typography variant="caption" sx={{ color: corBateria(dados.bateria), fontWeight: 600 }}>
+          {dados.bateria}%
+        </Typography>
+      </Box>
+    )}
+  </Box>
 
-                    <Box>
-                      <IconButton
-                        size="small" sx={{ color: '#3498db' }}
-                        onClick={() => handleEdit(idoso.id)}
-                        aria-label={`Editar ${idoso.nome}`}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small" sx={{ color: '#e74c3c' }}
-                        onClick={() => handleDelete(idoso.id, idoso.nome)}
-                        aria-label={`Inativar ${idoso.nome}`}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </Box>
+  {/* LADO DIREITO: Grupo de Botões (Onde o botão de teste deve estar) */}
+  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+    {/* 1. BOTÃO DE TESTAR PULSEIRA */}
+    <Tooltip title="Testar LED da Pulseira">
+      <IconButton
+        size="small"
+        sx={{ color: '#f39c12', mr: 0.5 }}
+        onClick={() => handleTestarPulseira(idoso.nome, serial)}
+      >
+        <LightbulbCircleIcon />
+      </IconButton>
+    </Tooltip>
+
+    {/* 2. BOTÃO EDITAR */}
+    <IconButton
+      size="small"
+      sx={{ color: '#3498db' }}
+      onClick={() => handleEdit(idoso.id)}
+    >
+      <EditIcon />
+    </IconButton>
+
+    {/* 3. BOTÃO EXCLUIR */}
+    <IconButton
+      size="small"
+      sx={{ color: '#e74c3c' }}
+      onClick={() => handleDelete(idoso.id, idoso.nome)}
+    >
+      <DeleteIcon />
+    </IconButton>
+  </Box>
+</Box>
 
                 </CardContent>
               </Card>
