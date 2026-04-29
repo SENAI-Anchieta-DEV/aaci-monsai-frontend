@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, TextField, Button, Typography, Paper, MenuItem, CircularProgress, Grid } from '@mui/material';
 import api from '../utils/api';
 import { validarNome, validarEmail, validarCPF, validarSenha, coletarErros } from '../utils/validators';
@@ -8,12 +8,27 @@ import { useToast } from '../components/ToastContext';
 const TIPOS_USUARIO = ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'];
 
 export default function CadastrarUsuario({ asiloId, onSucesso }) {
+  const perfilLogado = localStorage.getItem("tipoPerfil");
+  const asiloIdLogado = localStorage.getItem("asiloId");
+   // se não recebeu asiloId como prop, é SUPER_ADMIN
+  const isSuperAdmin = perfilLogado === 'SUPER_ADMIN';
+  const asiloInicial = isSuperAdmin ? '' : (asiloIdProp || asiloIdLogado);
   const [formData, setFormData] = useState({
-    nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR',
+    nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR', asiloId: asiloId || '',
   });
+  const [asilos, setAsilos]   = useState([]);          // ← lista para SUPER_ADMIN
   const [loading, setLoading] = useState(false);
   const [erros, setErros]     = useState({});
   const showToast = useToast();
+
+
+  // ── Busca os asilos só quando SUPER_ADMIN ──────────────────────────────────
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    api.get('/asilos')
+      .then((res) => setAsilos(res.data.filter((a) => a.ativo)))
+      .catch(() => showToast({ type: "error", title: "Erro", message: "Não foi possível carregar as unidades." }));
+  }, [isSuperAdmin, showToast]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -24,10 +39,12 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
 
   const validarFormulario = () => {
     const novosErros = coletarErros({
-      nome:  validarNome(formData.nome),
-      email: validarEmail(formData.email),
-      cpf:   validarCPF(formData.cpf),
-      senha: validarSenha(formData.senha),
+      nome:    validarNome(formData.nome),
+      email:   validarEmail(formData.email),
+      cpf:     validarCPF(formData.cpf),
+      senha:   validarSenha(formData.senha),
+      // Só exige selecionar o asilo se for Super Admin
+      asiloId: (isSuperAdmin && !formData.asiloId) ? "Selecione uma unidade." : null,  
     });
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
@@ -37,21 +54,23 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-   const idAsilo = Number(asiloId || localStorage.getItem("asiloId"));
-  if (!idAsilo) {
-    showToast({ 
-      type: "error", 
-      title: "Erro de Vínculo", 
-      message: "Não foi possível identificar o seu asilo. Tente deslogar e logar novamente." 
-    });
-    return;
-  }
+    // Garante que o ID do asilo vá preenchido, mesmo que o Gestor não veja o campo
+    const idParaEnviar = isSuperAdmin ? Number(formData.asiloId) : Number(asiloInicial);
+
+    if (!idParaEnviar) {
+      showToast({ type: "error", title: "Erro", message: "ID da unidade não identificado." });
+      return;
+    }
 
     setLoading(true);
     try {
-      await api.post('/usuarios', { ...formData, asiloId: idAsilo });
+      await api.post('/usuarios', { ...formData, asiloId: idParaEnviar });
       showToast({ type: "success", title: "Usuário cadastrado!", message: "O novo colaborador foi criado com sucesso." });
-      setFormData({ nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR' });
+      
+      // Reseta o form, mantendo o asiloInicial travado para o Gestor
+      setFormData({ 
+        nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR', asiloId: asiloInicial 
+      });
       if (onSucesso) onSucesso();
     } catch (err) {
       const mensagemErro = err.response?.data?.detail || err.response?.data?.message || "Erro ao conectar com o servidor.";
@@ -60,7 +79,6 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
       setLoading(false);
     }
   };
-
   return (
     <Box component="section" sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
       <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid #e0e0e0' }}>
@@ -69,6 +87,21 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
+
+            {/* ── Seletor de unidade — só aparece para SUPER_ADMIN ── */}
+            {isSuperAdmin && (
+              <Grid item xs={12}>
+                <TextField fullWidth select required label="Unidade (Asilo)" name="asiloId"
+                  value={formData.asiloId} onChange={handleChange}
+                  error={!!erros.asiloId} helperText={erros.asiloId || "Selecione a qual unidade esse usuário pertence (Apenas ADMIN)"}>
+                  <MenuItem value=""><em>Selecione...</em></MenuItem>
+                  {asilos.map((a) => (
+                    <MenuItem key={a.id} value={a.id}>{a.nome}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            )}
+
             <Grid item xs={12}>
               <TextField fullWidth required label="Nome Completo" name="nome"
                 value={formData.nome} onChange={handleChange}
