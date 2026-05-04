@@ -7,14 +7,22 @@ import { useToast } from '../components/ToastContext';
 
 const TIPOS_USUARIO = ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'];
 
-export default function CadastrarUsuario({ asiloId, onSucesso }) {
+// 1. Renomeamos o parâmetro para 'asiloIdProp' para evitar conflito com o estado interno
+export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
   const perfilLogado = localStorage.getItem("tipoPerfil");
   const asiloIdLogado = localStorage.getItem("asiloId");
-   // se não recebeu asiloId como prop, é SUPER_ADMIN
   const isSuperAdmin = perfilLogado === 'SUPER_ADMIN';
-  const asiloInicial = isSuperAdmin ? '' : (asiloIdProp || asiloIdLogado);
+  // 2. Agora 'asiloIdProp' está definido e pode ser usado aqui
+  const asiloInicial = isSuperAdmin ? '' : (asiloIdProp || asiloIdLogado || '');
   const [formData, setFormData] = useState({
-    nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR', asiloId: asiloId || '',
+    nome: '', 
+    email: '', 
+    senha: '', 
+    cpf: '', 
+    tipoUsuario: 'CUIDADOR', 
+    // 3. CORREÇÃO: Em vez de usar 'asiloId' (que não existe mais), 
+    // usamos o 'asiloInicial' que já tem a lógica correta.
+    asiloId: asiloInicial, 
   });
   const [asilos, setAsilos]   = useState([]);          // ← lista para SUPER_ADMIN
   const [loading, setLoading] = useState(false);

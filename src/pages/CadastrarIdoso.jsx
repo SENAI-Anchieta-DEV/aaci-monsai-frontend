@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Button, Typography, Paper, Grid, CircularProgress } from '@mui/material';
+import { Box, TextField, Button, Typography, Paper, MenuItem, Grid, CircularProgress } from '@mui/material';
 import api from '../utils/api';
 import { validarNome, validarEmail, validarCPF, validarSerial, coletarErros } from '../utils/validators';
 import { mascararCPF } from '../utils/masks';
 import { useToast } from '../components/ToastContext';
 
 export default function CadastrarIdoso({ gestorAsiloId }) {
+  const perfilLogado  = localStorage.getItem("tipoPerfil");
+  const asiloIdLogado = localStorage.getItem("asiloId");
+  const isSuperAdmin  = perfilLogado === 'SUPER_ADMIN';
+  const asiloInicial  = isSuperAdmin ? '' : (gestorAsiloId || asiloIdLogado || '');
+
   const [formData, setFormData] = useState({
-    nome: '', cpf: '', email: '', serialDispositivo: '', asiloId: gestorAsiloId,
+    nome: '', cpf: '', email: '', serialDispositivo: '', asiloId: asiloInicial,
   });
-  const [erros, setErros]   = useState({});
-  const [loading, setLoading] = useState(false);
+  const [asilos, setAsilos]     = useState([]);
+  const [erros, setErros]       = useState({});
+  const [loading, setLoading]   = useState(false);
   const showToast = useToast();
+
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    api.get('/asilos')
+      .then((res) => setAsilos(res.data.filter((a) => a.ativo)))
+      .catch(() => showToast({ type: "error", title: "Erro", message: "Não foi possível carregar as unidades." }));
+  }, [isSuperAdmin]);
 
   useEffect(() => {
     if (gestorAsiloId) setFormData((prev) => ({ ...prev, asiloId: gestorAsiloId }));
@@ -30,6 +43,7 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
       email:             validarEmail(formData.email),
       cpf:               validarCPF(formData.cpf),
       serialDispositivo: validarSerial(formData.serialDispositivo),
+      asiloId:           (isSuperAdmin && !formData.asiloId) ? "Selecione uma unidade." : null,
     });
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
@@ -39,11 +53,18 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
+    const idParaEnviar = isSuperAdmin ? Number(formData.asiloId) : Number(asiloInicial);
+
+    if (!idParaEnviar) {
+      showToast({ type: "error", title: "Erro", message: "ID da unidade não identificado." });
+      return;
+    }
+
     setLoading(true);
     try {
-      await api.post('/idosos', formData);
+      await api.post('/idosos', { ...formData, asiloId: idParaEnviar });
       showToast({ type: "success", title: "Idoso cadastrado!", message: "Idoso e pulseira vinculados com sucesso." });
-      setFormData({ nome: '', cpf: '', email: '', serialDispositivo: '', asiloId: gestorAsiloId });
+      setFormData({ nome: '', cpf: '', email: '', serialDispositivo: '', asiloId: asiloInicial });
     } catch (err) {
       const mensagem = err.response?.data?.detail || err.response?.data?.message || err.message;
       showToast({ type: "error", title: "Erro ao cadastrar", message: mensagem });
@@ -60,6 +81,20 @@ export default function CadastrarIdoso({ gestorAsiloId }) {
         </Typography>
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
+
+            {isSuperAdmin && (
+              <Grid item xs={12}>
+                <TextField fullWidth select required label="Unidade (Asilo)" name="asiloId"
+                  value={formData.asiloId} onChange={handleChange}
+                  error={!!erros.asiloId} helperText={erros.asiloId || "Selecione a unidade do idoso"}>
+                  <MenuItem value=""><em>Selecione...</em></MenuItem>
+                  {asilos.map((a) => (
+                    <MenuItem key={a.id} value={a.id}>{a.nome}</MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+            )}
+
             <Grid item xs={12}>
               <TextField fullWidth required label="Nome do Idoso" name="nome"
                 value={formData.nome} onChange={handleChange}
