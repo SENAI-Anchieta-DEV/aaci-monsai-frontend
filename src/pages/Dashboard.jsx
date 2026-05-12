@@ -11,14 +11,16 @@ import LocationOnIcon     from '@mui/icons-material/LocationOn';
 import LogoutIcon         from '@mui/icons-material/Logout';
 import ElderlyIcon        from '@mui/icons-material/Elderly';
 import ReportProblemIcon  from '@mui/icons-material/ReportProblem';
-import ApartmentIcon      from '@mui/icons-material/Apartment'; // ← ícone para Gerenciar Asilos
+import ApartmentIcon      from '@mui/icons-material/Apartment';
+import SearchIcon         from '@mui/icons-material/Search';
 
 import Monitoramento     from './Monitoramento';
 import CadastrarUsuario  from './CadastrarUsuario';
 import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
-import GerenciarAsilos   from './GerenciarAsilos';   // ← nova tela
+import GerenciarAsilos   from './GerenciarAsilos';  
 import MinhaConta        from './MinhaConta';
+import PesquisarSerial   from './PesquisarSerial';
 import { useAuth }       from '../hooks/useAuth';
 
 // ─── Configuração do menu ─────────────────────────────────────────────────────
@@ -54,6 +56,12 @@ const MENU_ITEMS = [
     perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR', 'SUPER_ADMIN'],
   },
   {
+    id: 'pesquisar_serial',
+    label: 'Pesquisar Dispositivo',
+    icon: <SearchIcon />,
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN'],
+  },
+  {
     id: 'historico_alertas',
     label: 'Histórico de Alertas',
     icon: <ReportProblemIcon />,
@@ -82,7 +90,8 @@ const renderizarTela = (telaAtiva, asiloId) => {
     cadastrar_idoso:  <CadastrarIdoso gestorAsiloId={asiloId} />,
     cadastrar:        <CadastrarUsuario asiloId={asiloId} />,
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
-    gerenciar_asilos: <GerenciarAsilos />,   // ✅ nova tela
+    gerenciar_asilos: <GerenciarAsilos />,
+    pesquisar_serial:  <PesquisarSerial />,  
     minha_conta:      <MinhaConta />,
     localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
     historico_alertas: <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>,

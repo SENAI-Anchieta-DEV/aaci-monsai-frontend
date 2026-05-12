@@ -7,36 +7,29 @@ import { useToast } from '../components/ToastContext';
 
 const TIPOS_USUARIO = ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'];
 
-// 1. Renomeamos o parâmetro para 'asiloIdProp' para evitar conflito com o estado interno
 export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
-  const perfilLogado = localStorage.getItem("tipoPerfil");
+  const perfilLogado  = localStorage.getItem("tipoPerfil");
   const asiloIdLogado = localStorage.getItem("asiloId");
-  const isSuperAdmin = perfilLogado === 'SUPER_ADMIN';
-  // 2. Agora 'asiloIdProp' está definido e pode ser usado aqui
-  const asiloInicial = isSuperAdmin ? '' : (asiloIdProp || asiloIdLogado || '');
+  const isSuperAdmin  = perfilLogado === 'SUPER_ADMIN';
+
+  // ✅ CORREÇÃO: usa String() para garantir tipo consistente no select e no Number()
+  const asiloInicial = isSuperAdmin ? '' : String(asiloIdProp || asiloIdLogado || '');
+
   const [formData, setFormData] = useState({
-    nome: '', 
-    email: '', 
-    senha: '', 
-    cpf: '', 
-    tipoUsuario: 'CUIDADOR', 
-    // 3. CORREÇÃO: Em vez de usar 'asiloId' (que não existe mais), 
-    // usamos o 'asiloInicial' que já tem a lógica correta.
-    asiloId: asiloInicial, 
+    nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR',
+    asiloId: asiloInicial,
   });
-  const [asilos, setAsilos]   = useState([]);          // ← lista para SUPER_ADMIN
+  const [asilos, setAsilos]   = useState([]);
   const [loading, setLoading] = useState(false);
   const [erros, setErros]     = useState({});
   const showToast = useToast();
 
-
-  // ── Busca os asilos só quando SUPER_ADMIN ──────────────────────────────────
   useEffect(() => {
     if (!isSuperAdmin) return;
     api.get('/asilos')
       .then((res) => setAsilos(res.data.filter((a) => a.ativo)))
       .catch(() => showToast({ type: "error", title: "Erro", message: "Não foi possível carregar as unidades." }));
-  }, [isSuperAdmin, showToast]);
+  }, [isSuperAdmin]);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -51,8 +44,7 @@ export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
       email:   validarEmail(formData.email),
       cpf:     validarCPF(formData.cpf),
       senha:   validarSenha(formData.senha),
-      // Só exige selecionar o asilo se for Super Admin
-      asiloId: (isSuperAdmin && !formData.asiloId) ? "Selecione uma unidade." : null,  
+      asiloId: (isSuperAdmin && !formData.asiloId) ? "Selecione uma unidade." : null,
     });
     setErros(novosErros);
     return Object.keys(novosErros).length === 0;
@@ -62,11 +54,11 @@ export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
     e.preventDefault();
     if (!validarFormulario()) return;
 
-    // Garante que o ID do asilo vá preenchido, mesmo que o Gestor não veja o campo
-    const idParaEnviar = isSuperAdmin ? Number(formData.asiloId) : Number(asiloInicial);
+    // ✅ CORREÇÃO: converte pra Number no envio, independente de ser string ou número
+    const idParaEnviar = Number(isSuperAdmin ? formData.asiloId : asiloInicial);
 
     if (!idParaEnviar) {
-      showToast({ type: "error", title: "Erro", message: "ID da unidade não identificado." });
+      showToast({ type: "error", title: "Erro", message: "ID da unidade não identificado. Tente deslogar e logar novamente." });
       return;
     }
 
@@ -74,11 +66,7 @@ export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
     try {
       await api.post('/usuarios', { ...formData, asiloId: idParaEnviar });
       showToast({ type: "success", title: "Usuário cadastrado!", message: "O novo colaborador foi criado com sucesso." });
-      
-      // Reseta o form, mantendo o asiloInicial travado para o Gestor
-      setFormData({ 
-        nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR', asiloId: asiloInicial 
-      });
+      setFormData({ nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR', asiloId: asiloInicial });
       if (onSucesso) onSucesso();
     } catch (err) {
       const mensagemErro = err.response?.data?.detail || err.response?.data?.message || "Erro ao conectar com o servidor.";
@@ -87,6 +75,7 @@ export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
       setLoading(false);
     }
   };
+
   return (
     <Box component="section" sx={{ maxWidth: 600, mx: 'auto', mt: 2 }}>
       <Paper elevation={0} sx={{ p: 4, borderRadius: 4, border: '1px solid #e0e0e0' }}>
@@ -96,16 +85,15 @@ export default function CadastrarUsuario({ asiloId: asiloIdProp, onSucesso }) {
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
 
-            {/* ── Seletor de unidade — só aparece para SUPER_ADMIN ── */}
+            {/* Seletor de unidade — só para SUPER_ADMIN */}
             {isSuperAdmin && (
               <Grid item xs={12}>
                 <TextField fullWidth select required label="Unidade (Asilo)" name="asiloId"
                   value={formData.asiloId} onChange={handleChange}
-                  error={!!erros.asiloId} helperText={erros.asiloId || "Selecione a qual unidade esse usuário pertence (Apenas ADMIN)"}>
+                  error={!!erros.asiloId} helperText={erros.asiloId || "Selecione a qual unidade esse usuário pertence"}>
                   <MenuItem value=""><em>Selecione...</em></MenuItem>
-                  {asilos.map((a) => (
-                    <MenuItem key={a.id} value={a.id}>{a.nome}</MenuItem>
-                  ))}
+                  {/* ✅ value como String para bater com o estado */}
+                  {asilos.map((a) => <MenuItem key={a.id} value={String(a.id)}>{a.nome}</MenuItem>)}
                 </TextField>
               </Grid>
             )}
