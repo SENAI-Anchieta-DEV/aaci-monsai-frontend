@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+<<<<<<< HEAD
+=======
+import { ThemeProvider, CssBaseline } from '@mui/material';
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 
 import './App.css'; 
 
@@ -9,9 +13,16 @@ import Lojinha from './pages/Lojinha';
 import RecuperarSenha from './pages/RecuperarSenha';
 import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
+<<<<<<< HEAD
 import Dashboard from './components/Dashboard';
 import AdminSetup from './components/AdminSetup';
 import Navbar from './components/Navbar'; //
+=======
+import Dashboard from './pages/Dashboard';
+import AdminSetup from './pages/AdminSetup';
+import Navbar from './components/Navbar';
+import theme from './components/createTheme';
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 import { ToastProvider } from './components/ToastContext';
 
 const SCREENS = {
@@ -51,6 +62,7 @@ function App() {
     }
   }, [applyAuth]);
 
+<<<<<<< HEAD
   const handleLoginSuccess = (dados) => {
     localStorage.setItem('token', dados.token);
     localStorage.setItem('tipoPerfil', dados.tipoPerfil);
@@ -62,6 +74,14 @@ function App() {
     
     applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
   };
+=======
+  const handleLoginSuccess = () => {
+  const token   = localStorage.getItem('token');
+  const perfil  = localStorage.getItem('tipoPerfil');
+  const asiloId = localStorage.getItem('asiloId');
+  applyAuth(token, perfil, asiloId);
+};
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 
   const handleLogout = () => {
     localStorage.clear(); 
@@ -73,7 +93,12 @@ function App() {
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
+<<<<<<< HEAD
         return <AdminSetup onFinish={handleLogout} onLogout={handleLogout} />;
+=======
+        return <AdminSetup onFinish={() => setCurrentScreen(SCREENS.DASHBOARD)} 
+            onLogout={() => setCurrentScreen(SCREENS.DASHBOARD)}/>;
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
       
       case SCREENS.DASHBOARD:
         return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogout} />;
@@ -111,6 +136,8 @@ function App() {
   };
 
   return (
+    <ThemeProvider theme={theme}>
+    <CssBaseline />
     <ToastProvider>
       <div className="App">
         {/* A Navbar inserida no topo de forma global */}
@@ -122,6 +149,10 @@ function App() {
         {renderContent()}
       </div>
     </ToastProvider>
+<<<<<<< HEAD
+=======
+    </ThemeProvider>
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
   );
 }
 

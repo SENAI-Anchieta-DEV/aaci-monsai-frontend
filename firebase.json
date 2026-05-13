@@ -1,4 +1,13 @@
 {
+<<<<<<< HEAD
+=======
+  "firestore": {
+    "database": "(default)",
+    "location": "southamerica-east1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
   "hosting": {
     "public": "build",
     "ignore": [

@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "compilerOptions": {
         "module": "ESNext",
         "moduleResolution": "Bundler",
@@ -13,4 +14,9 @@
         "node_modules",
         "**/node_modules/*"
     ]
+=======
+  "compilerOptions": {
+    "baseUrl": "src"
+  }
+>>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 }
