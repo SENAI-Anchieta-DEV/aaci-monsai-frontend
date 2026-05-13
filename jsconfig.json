@@ -1,22 +1,5 @@
 {
-<<<<<<< HEAD
-    "compilerOptions": {
-        "module": "ESNext",
-        "moduleResolution": "Bundler",
-        "target": "ES2024",
-        "jsx": "react-jsx",
-        "allowImportingTsExtensions": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strict": true
-    },
-    "exclude": [
-        "node_modules",
-        "**/node_modules/*"
-    ]
-=======
   "compilerOptions": {
     "baseUrl": "src"
   }
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 }

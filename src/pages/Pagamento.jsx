@@ -1,8 +1,4 @@
 import { useState } from "react";
-<<<<<<< HEAD
-import logo from "../assets/logos/Logo_nome.png";
-=======
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -10,10 +6,6 @@ import {
   Box, Button, Typography,
   TextField, Divider,
 } from "@mui/material";
-<<<<<<< HEAD
-import MenuIcon from "@mui/icons-material/Menu";
-=======
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 import { mascararCPF, mascararCartao, mascararValidade, mascararCVV, mascararCEP } from '../utils/masks';
 
 const theme = createTheme({
@@ -220,11 +212,7 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
   });
 
   const preco = 499.99;
-<<<<<<< HEAD
-  const frete = form.cep.length >= 9 ? 51.00 : null; 
-=======
   const frete = form.cep.length >= 9 ? 51.00 : null;
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
   const total = frete ? (preco * qty + frete).toFixed(2) : null;
 
   const setField = (field) => (e) => {
@@ -237,20 +225,6 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
     setForm((f) => ({ ...f, [field]: value }));
   };
 
-<<<<<<< HEAD
-  const setField = (field) => (e) => {
-    let value = e.target.value;
-    if (field === "cpf") value = mascararCPF(value);
-    else if (field === "cartao") value = mascararCartao(value);
-    else if (field === "validade") value = mascararValidade(value);
-    else if (field === "cvv") value = mascararCVV(value);
-    else if (field === "cep") value = mascararCEP(value);
-
-    setForm((f) => ({ ...f, [field]: value }));
-  };
-
-=======
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
   const handleCopiar = (texto, label) => {
     navigator.clipboard.writeText(texto);
     showToast({ type: "success", title: "Copiado!",
@@ -281,11 +255,7 @@ export default function Pagamento({ onVoltar, onHome, qty = 1 }) {
 
   return (
     <ThemeProvider theme={theme}>
-<<<<<<< HEAD
-      <Box sx={{ minHeight: "100vh", bgcolor: "#ffffff", display: "flex", flexDirection: "column" }}>
-=======
       <Box sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: "flex", flexDirection: "column" }}>
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
 
         {/* ── CONTEÚDO ── */}
         <Box sx={{ flex: 1, display: "flex", alignItems: "center",

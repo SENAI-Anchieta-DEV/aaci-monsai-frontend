@@ -1,6 +1,4 @@
 {
-<<<<<<< HEAD
-=======
   // Example (Standard Edition):
   //
   // "indexes": [
@@ -48,7 +46,6 @@
   //     ]
   //   },
   // ]
->>>>>>> AACI-163-autenticar-usuario-no-frontend-login-funcional
   "indexes": [],
   "fieldOverrides": []
 }
