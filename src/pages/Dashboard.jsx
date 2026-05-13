@@ -19,8 +19,9 @@ import CadastrarUsuario  from './CadastrarUsuario';
 import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
-import MinhaConta        from './MinhaConta';
-import { useAuth }       from '../hooks/useAuth';
+import HistoricoAlertas from './HistoricoAlertas';
+import MinhaConta       from './MinhaConta';
+import { useAuth }      from '../hooks/useAuth';
 
 // ─── Configuração do menu ─────────────────────────────────────────────────────
 const MENU_ITEMS = [
@@ -86,7 +87,7 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
     localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
-    historico_alertas: <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>,
+    historico_alertas: <HistoricoAlertas asiloId={asiloId} />,
   };
   return telas[telaAtiva]
     ?? <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Erro 404: Página não encontrada</Typography>;
