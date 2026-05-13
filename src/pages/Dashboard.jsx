@@ -58,7 +58,7 @@ const MENU_ITEMS = [
     id: 'historico_alertas',
     label: 'Histórico de Alertas',
     icon: <ReportProblemIcon />,
-    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN'],
+    perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN', 'FAMILIAR'],
   },
   // ✅ Exclusivo do SUPER_ADMIN
   {
