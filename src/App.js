@@ -1,9 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { ThemeProvider, CssBaseline } from '@mui/material';
-
-import './App.css'; 
-
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Lojinha from './pages/Lojinha';
@@ -13,8 +9,8 @@ import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
 import Navbar from './components/Navbar';
-import theme from './components/createTheme';
 import { ToastProvider } from './components/ToastContext';
+import api from './utils/api'; 
 
 const SCREENS = {
   HOME: 'home',
@@ -33,9 +29,13 @@ function App() {
   const [qty, setQty] = useState(1);
 
   const applyAuth = useCallback((token, perfil, asiloId) => {
+    // Seta headers do Axios Padrão e do API Customizado
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setAuth({ isAuth: true, perfil, asiloId }); 
+    if (api) api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+    setAuth({ isAuth: true, perfil, asiloId: asiloId ? Number(asiloId) : null }); 
     
+    // Roteamento inteligente baseado no perfil do usuário
     if (perfil === 'SUPER_ADMIN') {
       setCurrentScreen(SCREENS.ADMIN_SETUP);
     } else {
@@ -43,6 +43,7 @@ function App() {
     }
   }, []);
 
+  // Monitora o localStorage ao abrir o App
   useEffect(() => {
     const token = localStorage.getItem('token');
     const perfil = localStorage.getItem('tipoPerfil');
@@ -53,28 +54,38 @@ function App() {
     }
   }, [applyAuth]);
 
+  // Função disparada no retorno do componente <Login />
   const handleLoginSuccess = () => {
-  const token   = localStorage.getItem('token');
-  const perfil  = localStorage.getItem('tipoPerfil');
-  const asiloId = localStorage.getItem('asiloId');
-  applyAuth(token, perfil, asiloId);
-};
+    const token   = localStorage.getItem('token');
+    const perfil  = localStorage.getItem('tipoPerfil');
+    const asiloId = localStorage.getItem('asiloId');
+    applyAuth(token, perfil, asiloId);
+  };
 
-  const handleLogout = () => {
+  // ⚠️ MODIFICAÇÃO: Função central de Logout que destrói a sessão e volta para o Login Limpo
+  const handleLogoutGlobal = useCallback(() => {
     localStorage.clear(); 
     delete axios.defaults.headers.common['Authorization'];
-    setAuth({ isAuth: false, perfil: '' });
-    setCurrentScreen(SCREENS.HOME);
-  };
+    if (api) delete api.defaults.headers.common['Authorization'];
+    
+    setAuth({ isAuth: false, perfil: '', asiloId: null });
+    setCurrentScreen(SCREENS.LOGIN); 
+  }, []);
 
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
-        return <AdminSetup onFinish={() => setCurrentScreen(SCREENS.DASHBOARD)} 
-            onLogout={() => setCurrentScreen(SCREENS.DASHBOARD)}/>;
+        return (
+          <AdminSetup 
+            // ⚠️ MODIFICAÇÃO: Após terminar o setup, força logout em vez de ir pra Dash vazia
+            onFinish={handleLogoutGlobal} 
+            // ⚠️ MODIFICAÇÃO: Botão Sair faz logout completo
+            onLogout={handleLogoutGlobal} 
+          />
+        );
       
       case SCREENS.DASHBOARD:
-        return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogout} />;
+        return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogoutGlobal} />;
       
       case SCREENS.LOJINHA:
         return (
@@ -109,20 +120,10 @@ function App() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-    <CssBaseline />
     <ToastProvider>
-      <div className="App">
-        {/* A Navbar inserida no topo de forma global */}
-        <Navbar 
-          onNavigate={(tela) => setCurrentScreen(tela)} 
-          currentScreen={currentScreen} 
-        />
-        
-        {renderContent()}
-      </div>
+      <Navbar onNavigate={(screen) => setCurrentScreen(screen)} currentScreen={currentScreen} />
+      {renderContent()}
     </ToastProvider>
-    </ThemeProvider>
   );
 }
 
