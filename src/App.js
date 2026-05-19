@@ -11,10 +11,6 @@ import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
-import Navbar from './components/Navbar'; //
-import Pagamento from './pages/Pagamento';
-import Dashboard from './pages/Dashboard';
-import AdminSetup from './pages/AdminSetup';
 import Navbar from './components/Navbar';
 import { ToastProvider } from './components/ToastContext';
 import api from './utils/api'; 
