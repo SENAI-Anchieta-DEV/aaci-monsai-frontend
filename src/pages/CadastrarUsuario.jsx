@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { 
   Box, TextField, Button, Typography, Paper, MenuItem, 
-  Alert, CircularProgress, Grid 
+  CircularProgress, Grid 
 } from '@mui/material';
+
+// Importações com os caminhos corretos a partir da pasta pages/
 import api from '../utils/api';
 import { validarNome, validarEmail, validarCPF, validarSenha, coletarErros } from '../utils/validators';
 import { mascararCPF } from '../utils/masks';
+import { useToast } from '../components/ToastContext'; // 🌟 Adicionado o contexto de Toast
 
 const TIPOS_USUARIO = ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR'];
 
 export default function CadastrarUsuario({ asiloId, onSucesso }) {
+  const showToast = useToast(); // Instanciando o Toast
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -17,7 +21,9 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     cpf: '',
     tipoUsuario: 'CUIDADOR',
   });
-  const [status, setStatus] = useState({ loading: false, error: null, success: false });
+  
+  // 🌟 O estado de status foi simplificado apenas para 'loading'
+  const [loading, setLoading] = useState(false);
   const [erros, setErros] = useState({});
 
   // Atualiza o estado do formulário dinamicamente conforme o usuário digita
@@ -53,27 +59,45 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
     // Verifica e converte o ID do asilo para garantir que é um número válido
     const idAsilo = Number(asiloId);
     if (!idAsilo) {
-      setStatus({ loading: false, error: 'ID do asilo inválido. Faça login novamente.', success: false });
+      showToast({ 
+        type: "error", 
+        title: "Sessão Inválida", 
+        message: "ID do asilo inválido. Faça login novamente." 
+      });
       return;
     }
 
-    setStatus({ loading: true, error: null, success: false });
+    setLoading(true);
 
     try {
       // Monta o payload final anexando o ID do asilo
       await api.post('/usuarios', { ...formData, asiloId: idAsilo });
 
-      // Limpa os dados do formulário e indica sucesso na operação
-      setStatus({ loading: false, error: null, success: true });
+      // 🌟 Troca o <Alert> pelo Toast de sucesso
+      showToast({ 
+        type: "success", 
+        title: "Sucesso!", 
+        message: "Usuário cadastrado com sucesso!" 
+      });
+      
+      // Limpa os dados do formulário
       setFormData({ nome: '', email: '', senha: '', cpf: '', tipoUsuario: 'CUIDADOR' });
 
       // Chama o callback opcional para notificar componentes pai (como o Dashboard)
       if (onSucesso) onSucesso();
 
     } catch (err) {
-      // Captura o erro disparado pelo GlobalExceptionHandler (buscando a propriedade 'detail' do ProblemDetail)
+      // Captura o erro disparado pelo GlobalExceptionHandler do Spring Boot
       const mensagemErro = err.response?.data?.detail || err.response?.data?.message || "Erro ao conectar com o servidor.";
-      setStatus({ loading: false, error: mensagemErro, success: false });
+      
+      // 🌟 Troca o <Alert> pelo Toast de erro
+      showToast({ 
+        type: "error", 
+        title: "Falha no Cadastro", 
+        message: mensagemErro 
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -88,16 +112,7 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
           Novo Colaborador
         </Typography>
 
-        {status.success && (
-          <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
-            Usuário cadastrado com sucesso!
-          </Alert>
-        )}
-        {status.error && (
-          <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-            {status.error}
-          </Alert>
-        )}
+        {/* 🌟 Os <Alert> que ficavam aqui foram removidos, deixando o layout mais limpo */}
 
         <Box component="form" onSubmit={handleSubmit} noValidate>
           <Grid container spacing={2}>
@@ -147,10 +162,10 @@ export default function CadastrarUsuario({ asiloId, onSucesso }) {
             <Grid item xs={12}>
               <Button
                 type="submit" fullWidth variant="contained"
-                disabled={status.loading}
+                disabled={loading} // 🌟 Ajustado para o novo estado
                 sx={{ mt: 2, bgcolor: '#2d5a27', '&:hover': { bgcolor: '#1a3d0a' }, py: 1.5, borderRadius: 2 }}
               >
-                {status.loading ? <CircularProgress size={24} /> : 'Finalizar Cadastro'}
+                {loading ? <CircularProgress size={24} /> : 'Finalizar Cadastro'}
               </Button>
             </Grid>
           </Grid>

@@ -12,17 +12,18 @@ import LogoutIcon         from '@mui/icons-material/Logout';
 import ElderlyIcon        from '@mui/icons-material/Elderly';
 import ReportProblemIcon  from '@mui/icons-material/ReportProblem';
 import ApartmentIcon      from '@mui/icons-material/Apartment';
-import SearchIcon         from '@mui/icons-material/Search';
 
+// Importações corrigidas apontando para a mesma pasta pages/
 import Monitoramento     from './Monitoramento';
 import CadastrarUsuario  from './CadastrarUsuario';
 import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
-import MinhaConta        from './MinhaConta';
+import MinhaConta       from './MinhaConta';
+import HistoricoAlertas  from './HistoricoAlertas'; // ✅ RECONSTITUÍDO: Seu componente clínico original resgatado
 import { useAuth }       from '../hooks/useAuth';
 
-// ─── Configuração do menu ─────────────────────────────────────────────────────
+// ─── Configuração do menu unificada (Nível de Acessos Coletivo + Super Admin) ─
 const MENU_ITEMS = [
   {
     id: 'monitoramento',
@@ -60,7 +61,6 @@ const MENU_ITEMS = [
     icon: <ReportProblemIcon />,
     perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN', 'FAMILIAR'],
   },
-  // ✅ Exclusivo do SUPER_ADMIN
   {
     id: 'gerenciar_asilos',
     label: 'Gerenciar Unidades',
@@ -77,6 +77,7 @@ const LABEL_PERFIL = {
   SUPER_ADMIN: 'Admin',
 };
 
+// ─── Injeção dinâmica de componentes na viewport principal ───────────────────
 const renderizarTela = (telaAtiva, asiloId) => {
   const telas = {
     monitoramento:    <Monitoramento />,
@@ -86,30 +87,38 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
     localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
-    historico_alertas: <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>,
+    // ✅ Histórico de Alertas reconfigurado para ler o seu arquivo real em vez de texto Mockado
+    historico_alertas: <HistoricoAlertas asiloId={asiloId} />, 
   };
+
   return telas[telaAtiva]
     ?? <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Erro 404: Página não encontrada</Typography>;
 };
 
-// ─── Componente Principal ─────────────────────────────────────────────────────
+// ─── Componente Construtor do Dashboard ──────────────────────────────────────
 export default function Dashboard({ perfil, asiloId, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [telaAtiva, setTelaAtiva]   = useState('monitoramento');
   const { nome }                    = useAuth();
 
   const perfilNormalizado = (perfil?.toUpperCase() || '').replace('ROLE_', '');
-  const menuPermitido     = MENU_ITEMS.filter((item) =>
+  
+  // Realiza a filtragem das opções do menu lateral dinamicamente em tempo de execução
+  const menuPermitido = MENU_ITEMS.filter((item) =>
     item.perfisPermitidos.includes(perfilNormalizado)
   );
 
-  const handleNavegar = (idTela) => { setTelaAtiva(idTela); setDrawerOpen(false); };
-  const tituloPainel  = LABEL_PERFIL[perfilNormalizado] || 'Usuário';
+  const handleNavegar = (idTela) => { 
+    setTelaAtiva(idTela); 
+    setDrawerOpen(false); 
+  };
+  
+  const tituloPainel = LABEL_PERFIL[perfilNormalizado] || 'Usuário';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f4f7f1' }}>
 
-      {/* TOPBAR */}
+      {/* TOPBAR GLOBAL */}
       <AppBar component="header" position="fixed"
         sx={{ bgcolor: '#AED696', boxShadow: 'none', zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
@@ -126,7 +135,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
         </Toolbar>
       </AppBar>
 
-      {/* MENU LATERAL */}
+      {/* DRAWER LATERAL NATIVO (MATERIAL UI) */}
       <Drawer component="nav" aria-label="Menu principal" variant="temporary"
         open={drawerOpen} onClose={() => setDrawerOpen(false)}
         sx={{ '& .MuiDrawer-paper': { width: 260, boxSizing: 'border-box',
@@ -182,7 +191,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
         </List>
       </Drawer>
 
-      {/* CONTEÚDO PRINCIPAL */}
+      {/* RENDERIZADOR DA VIEWPORT */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 12 }}>
         {renderizarTela(telaAtiva, asiloId)}
       </Box>

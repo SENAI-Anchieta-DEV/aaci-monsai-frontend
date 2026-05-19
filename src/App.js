@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+
+import './App.css'; 
+
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Lojinha from './pages/Lojinha';
 import RecuperarSenha from './pages/RecuperarSenha';
 import AlterarSenha from './pages/AlterarSenha';
+import Pagamento from './pages/Pagamento';
+import Dashboard from './pages/Dashboard';
+import AdminSetup from './pages/AdminSetup';
+import Navbar from './components/Navbar'; //
 import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
