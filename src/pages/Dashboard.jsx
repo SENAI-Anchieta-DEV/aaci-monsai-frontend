@@ -20,6 +20,7 @@ import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
 import MinhaConta        from './MinhaConta';
+import LocalizarIdoso from './LocalizarIdoso';
 import { useAuth }       from '../hooks/useAuth';
 
 // ─── Configuração do menu ─────────────────────────────────────────────────────
@@ -55,7 +56,7 @@ const MENU_ITEMS = [
     perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'FAMILIAR', 'SUPER_ADMIN'],
   },
   {
-    id: 'historico_alertas',
+    id: 'historico_alertas',  
     label: 'Histórico de Alertas',
     icon: <ReportProblemIcon />,
     perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN', 'FAMILIAR'],
@@ -85,7 +86,7 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
-    localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
+    localizar:        <LocalizarIdoso />,
     historico_alertas: <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Histórico em breve</Typography>,
   };
   return telas[telaAtiva]
