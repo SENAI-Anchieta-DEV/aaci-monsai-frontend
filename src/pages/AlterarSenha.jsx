@@ -6,7 +6,7 @@ import {
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import logo from "../assets/logos/Logo_nome.png";
 import { useToast } from "../components/ToastContext";
-import api from "utils/api";
+import api from "../utils/api";
 
 const theme = createTheme({
   palette: {

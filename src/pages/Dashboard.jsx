@@ -20,7 +20,8 @@ import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
 import MinhaConta       from './MinhaConta';
-import HistoricoAlertas  from './HistoricoAlertas'; // ✅ RECONSTITUÍDO: Seu componente clínico original resgatado
+import LocalizarIdoso    from './LocalizarIdoso.jsx';    // ✅ Integrado
+import HistoricoAlertas  from './HistoricoAlertas';  // ✅ Integrado
 import { useAuth }       from '../hooks/useAuth';
 
 // ─── Configuração do menu unificada (Nível de Acessos Coletivo + Super Admin) ─
@@ -86,9 +87,8 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
-    localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
-    // ✅ Histórico de Alertas reconfigurado para ler o seu arquivo real em vez de texto Mockado
-    historico_alertas: <HistoricoAlertas asiloId={asiloId} />, 
+   localizar:         <LocalizarIdoso />,              // ✅ Componente real de Mapa
+    historico_alertas: <HistoricoAlertas asiloId={asiloId} />, // ✅ Componente real de Alertas
   };
 
   return telas[telaAtiva]
