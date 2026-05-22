@@ -296,6 +296,7 @@ export default function Monitoramento() {
 
         <TextField
           label="Pesquisar por nome ou serial..."
+          inputProps={{ "data-cy": "input-pesquisa" }}
           variant="outlined" size="small"
           onChange={(e) => setTermoPesquisa(e.target.value)}
           sx={{
