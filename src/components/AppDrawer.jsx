@@ -9,12 +9,12 @@ import InfoIcon from "@mui/icons-material/Info";
 import PhoneIcon from "@mui/icons-material/Phone";
 import logo from "../assets/logos/Logo_nome.png";
 
-// Mapeamento dos links conforme o seu estado SCREENS do App.js
+// Mapeamento dos links com suporte a seções (BUG-06 Fix)
 const NAV_LINKS = [
   { label: "Solicitar adesão", path: "lojinha", icon: <ShoppingCartIcon fontSize="small" /> },
   { label: "Sou Cliente",      path: "login",   icon: <PersonIcon fontSize="small" /> },
-  { label: "Sobre nós",        path: "home",    icon: <InfoIcon fontSize="small" /> },
-  { label: "Contato",          path: "home",    icon: <PhoneIcon fontSize="small" /> },
+  { label: "Sobre nós",        path: "home",    section: "sobre-nos", icon: <InfoIcon fontSize="small" /> },
+  { label: "Contato",          path: "home",    section: "contato",   icon: <PhoneIcon fontSize="small" /> },
 ];
 
 export default function AppDrawer({ open, onClose, onNav }) {
@@ -26,20 +26,20 @@ export default function AppDrawer({ open, onClose, onNav }) {
       PaperProps={{ 
         sx: { 
           width: 280, 
-          bgcolor: "#1a3d0a", // O verde escuro de fundo que você definiu
+          bgcolor: "#1a3d0a", // Fundo verde escuro MONSAI
           color: "#fff", 
           pt: 0 
         } 
       }}
     >
-      {/* Cabeçalho com fundo verde claro e a Logo do MONSAI */}
+      {/* Cabeçalho com fundo verde claro e a Logo */}
       <Box sx={{ 
         display: "flex", 
         alignItems: "center", 
         justifyContent: "space-between", 
         px: 2, 
         py: 2, 
-        bgcolor: "#AED696" // Verde claro igual ao da sua Navbar
+        bgcolor: "#AED696" // Verde claro da Navbar
       }}>
         <Box 
           component="img" 
@@ -54,12 +54,13 @@ export default function AppDrawer({ open, onClose, onNav }) {
 
       <Divider sx={{ borderColor: "rgba(255,255,255,0.1)" }} />
 
-      {/* Lista de Navegação Estilizada */}
+      {/* Lista de Navegação */}
       <List sx={{ pt: 2 }}>
         {NAV_LINKS.map((item) => (
           <ListItem key={item.label} disablePadding>
             <ListItemButton 
-              onClick={() => onNav(item.path)} 
+              // Passa path e section para a função de navegação centralizada
+              onClick={() => onNav(item.path, item.section)} 
               sx={{ 
                 px: 3, 
                 py: 2, 

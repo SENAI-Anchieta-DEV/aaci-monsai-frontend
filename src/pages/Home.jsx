@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // useEffect recuperado
 import logo from "../assets/logos/Logo_nome.png";
 import logoCompleta from "../assets/logos/Logo_completa.png";
 import idosoFeliz from "../assets/images/idoso_feliz_2.png";
@@ -6,15 +6,12 @@ import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  AppBar, Toolbar, Box, Button, Container, Typography, Grid,
-  IconButton, Drawer, List, ListItem, ListItemButton, ListItemText,
+  Box, Button, Container, Typography, Grid,
   TextField, useMediaQuery,
-  Link,
 } from "@mui/material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import MenuIcon from "@mui/icons-material/Menu";
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 
@@ -42,7 +39,6 @@ const theme = createTheme({
   },
 });
 
-
 function ImgPlaceholder({ label, height = 200 }) {
   return (
     <Box sx={{ height, border: "2px dashed #bbb", borderRadius: 2, bgcolor: "#e0e0e0",
@@ -52,17 +48,25 @@ function ImgPlaceholder({ label, height = 200 }) {
   );
 }
 
-export default function Home({ onIrParaLogin, onIrParaLojinha }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [email, setEmail]           = useState("");
+// ─── COMPONENTE HOME (Com lógica de scroll restaurada) ────────────────────────
+export default function Home({ onIrParaLogin, onIrParaLojinha, secaoParaRolar, resetarScroll }) {
+  const [email, setEmail] = useState("");
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const showToast = useToast();
 
-  const handleNav = (link) => {
-    setDrawerOpen(false);
-    if (link === "Sou Cliente")      onIrParaLogin();
-    if (link === "Solicitar adesão") onIrParaLojinha();
-  };
+  // ── RECOUPERAÇÃO DA LÓGICA DO BUG-06 ──
+  useEffect(() => {
+    if (secaoParaRolar) {
+      const timer = setTimeout(() => {
+        const elemento = document.getElementById(secaoParaRolar);
+        if (elemento) {
+          elemento.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (resetarScroll) resetarScroll();
+        }
+      }, 150); // 150ms para garantir que o DOM de SPAs pesadas carregue
+      return () => clearTimeout(timer);
+    }
+  }, [secaoParaRolar, resetarScroll]);
 
   const handleEnviarEmail = () => {
     if (!email || !email.includes("@")) {
@@ -146,23 +150,18 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
           </Typography>
           <Typography variant="body1" color="text.secondary"
             sx={{ maxWidth: 720, mx: "auto", lineHeight: 1.8 }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut quam tristique,
-            pul vinar eros eu, commodo libero. Aenean ullamcorper maximus augue eu iaculis.
-            Pellentesque sed efficitur elit. Sed ultricies, nulla nec eleifend faucibus,
-            lorem lectus blandit velit, at vehicula neque tempus ex. Suspendisse potenti.
+            Oferecemos uma solução completa de monitoramento inteligente, focada na dignidade e segurança. 
+            Nosso sistema integra hardware de ponta e software intuitivo para garantir que quem você ama nunca esteja desamparado.
           </Typography>
         </Box>
 
         <Grid container spacing={4} alignItems="center">
           <Grid item xs={12} md={6}>
             <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut quam tristique,
-              pul vinar eros eu, commodo libero. Aenean ullamcorper maximus augue eu iaculis.
-              Pellentesque sed efficitur elit.
+              Através de sensores discretos e algoritmos avançados, o MONSAI detecta anomalias e envia alertas em tempo real.
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8, mt: 2 }}>
-              Sed ultricies, nulla nec eleifend faucibus, lorem lectus blandit velit,
-              at vehicula neque tempus ex. Suspendisse potenti.
+              Seja em residências particulares ou em instituições de longa permanência, nossa tecnologia se adapta para prover o melhor cuidado.
             </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -182,9 +181,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
             </Grid>
             <Grid item xs={12} md={8}>
               <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut quam tristique,
-                pul vinar eros eu, commodo libero. Aenean ullamcorper maximus augue eu iaculis.
-                Pellentesque sed efficitur elit.
+                Nossa equipe é formada por especialistas apaixonados por tecnologia e cuidado humano. Unimos engenharia e saúde para criar algo único.
               </Typography>
             </Grid>
           </Grid>
@@ -192,9 +189,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
           <Grid container spacing={4} alignItems="center" direction={{ xs: "column", md: "row" }}>
             <Grid item xs={12} md={8} order={{ xs: 2, md: 1 }}>
               <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut quam tristique,
-                pul vinar eros eu, commodo libero. Aenean ullamcorper maximus augue eu iaculis.
-                Pellentesque sed efficitur elit.
+                Trabalhamos incansavelmente para que o MONSAI seja sinônimo de confiança para as famílias brasileiras.
               </Typography>
             </Grid>
             <Grid item xs={12} md={4} order={{ xs: 1, md: 2 }}>
@@ -233,35 +228,15 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
         }}
       >
         <Grid container spacing={5} alignItems="flex-start" sx={{ maxWidth: 1100, mx: "auto", mb: 4 }}>
-
-          {/* COLUNA 1: Logo, Descrição e Redes Sociais */}
+          {/* COLUNA 1: Logo e Redes */}
           <Grid item xs={12} md={4}>
-            <Box 
-              component="img" 
-              src={logo} 
-              alt="MONSAI"
-              sx={{ height: 40, objectFit: "contain", mb: 2, display: "block" }} 
-            />
+            <Box component="img" src={logo} alt="MONSAI" sx={{ height: 40, mb: 2, display: "block" }} />
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", mb: 3, maxWidth: 280, lineHeight: 1.6 }}>
               Inovação que acompanha cada momento. Siga nossas redes para mais informações.
             </Typography>
-            
             <Box sx={{ display: "flex", gap: 1.5 }}>
               {[InstagramIcon, YouTubeIcon, LinkedInIcon].map((Icon, i) => (
-                <Box 
-                  key={i} 
-                  sx={{
-                    width: 36, height: 36, borderRadius: 1.5,
-                    bgcolor: "rgba(255,255,255,0.08)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", 
-                    transition: "all 0.2s ease-in-out",
-                    "&:hover": { 
-                      bgcolor: "rgba(255,255,255,0.2)",
-                      transform: "translateY(-2px)" // Efeito sutil de levantar ao passar o mouse
-                    },
-                  }}
-                >
+                <Box key={i} sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: "rgba(255,255,255,0.08)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", transition: "0.2s", "&:hover": { bgcolor: "rgba(255,255,255,0.2)" } }}>
                   <Icon sx={{ fontSize: "1.2rem", color: "white" }} />
                 </Box>
               ))}
@@ -270,78 +245,40 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
 
           {/* COLUNA 2: Contatos */}
           <Grid item xs={12} md={4}>
-            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 2, letterSpacing: 0.5 }}>
-              Fale Conosco
-            </Typography>
+            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 2 }}>Fale Conosco</Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <EmailIcon sx={{ color: "rgba(255,255,255,0.6)", fontSize: "1.3rem" }} />
-                <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
-                  contato@monsai.com.br
-                </Typography>
+                <Typography variant="body2">contato@monsai.com.br</Typography>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <PhoneIcon sx={{ color: "rgba(255,255,255,0.6)", fontSize: "1.3rem" }} />
-                <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.8)" }}>
-                  (11) 3199-9999
-                </Typography>
+                <Typography variant="body2">(11) 3199-9999</Typography>
               </Box>
             </Box>
           </Grid>
 
           {/* COLUNA 3: Newsletter */}
           <Grid item xs={12} md={4}>
-            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 1, letterSpacing: 0.5 }}>
-              Newsletter
-            </Typography>
-            <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.7)", mb: 2 }}>
-              Receba atualizações e ofertas exclusivas no seu email.
-            </Typography>
-            
-            <Box sx={{ display: "flex", borderRadius: 1.5, overflow: "hidden", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+            <Typography variant="subtitle1" sx={{ color: "white", fontWeight: 600, mb: 1 }}>Newsletter</Typography>
+            <Box sx={{ display: "flex", borderRadius: 1.5, overflow: "hidden", mt: 2 }}>
               <TextField 
                 size="small" 
-                variant="outlined" 
                 placeholder="seu@email.com"
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)}
-                sx={{
-                  flex: 1, bgcolor: "#fff",
-                  "& .MuiOutlinedInput-root": { 
-                    borderRadius: 0,
-                    "& fieldset": { border: "none" } 
-                  },
-                  input: { py: "10px", fontSize: "0.9rem", color: "text.primary" },
-                }}
+                sx={{ flex: 1, bgcolor: "#fff", "& fieldset": { border: "none" } }}
               />
-              <Button 
-                variant="contained" 
-                onClick={handleEnviarEmail}
-                sx={{ 
-                  borderRadius: 0, 
-                  px: 3, 
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  bgcolor: "primary.dark", 
-                  "&:hover": { bgcolor: "#0f2606" } 
-                }}
-              >
-                Assinar
-              </Button>
+              <Button variant="contained" onClick={handleEnviarEmail} sx={{ borderRadius: 0, bgcolor: "primary.dark" }}>Assinar</Button>
             </Box>
           </Grid>
-
         </Grid>
-
-        {/* LINHA FINAL: Direitos Autorais */}
         <Box sx={{ borderTop: "2px solid rgba(255,255,255,0.1)", pt: 3, mt: 2, textAlign: "center" }}>
           <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.5)", fontSize: "0.8rem" }}>
             © {new Date().getFullYear()} MONSAI – Todos os direitos reservados.
           </Typography>
         </Box>
       </Box>
-
-          </ThemeProvider>
+    </ThemeProvider>
   );
 }

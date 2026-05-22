@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
 import './App.css'; 
 
@@ -12,8 +13,9 @@ import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
 import Navbar from './components/Navbar';
+import theme from './components/createTheme'; // Import do tema mantido
 import { ToastProvider } from './components/ToastContext';
-import api from './utils/api'; 
+import api from './utils/api'; // Import da API customizada mantido
 
 const SCREENS = {
   HOME: 'home',
@@ -28,6 +30,7 @@ const SCREENS = {
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.HOME);
+  const [secaoScroll, setSecaoScroll] = useState(null); // Mantido: Estado do BUG-06
   const [auth, setAuth] = useState({ isAuth: false, perfil: '', asiloId: null });
   const [qty, setQty] = useState(1);
 
@@ -46,7 +49,6 @@ function App() {
     }
   }, []);
 
-  // Monitora o localStorage ao abrir o App
   useEffect(() => {
     const token = localStorage.getItem('token');
     const perfil = localStorage.getItem('tipoPerfil');
@@ -57,7 +59,6 @@ function App() {
     }
   }, [applyAuth]);
 
-  // Função disparada no retorno do componente <Login />
   const handleLoginSuccess = () => {
     const token   = localStorage.getItem('token');
     const perfil  = localStorage.getItem('tipoPerfil');
@@ -65,14 +66,14 @@ function App() {
     applyAuth(token, perfil, asiloId);
   };
 
-  // ⚠️ MODIFICAÇÃO: Função central de Logout que destrói a sessão e volta para o Login Limpo
+  // Função central de Logout (Lógica de destruição de sessão + Reset de Tela)
   const handleLogoutGlobal = useCallback(() => {
     localStorage.clear(); 
     delete axios.defaults.headers.common['Authorization'];
     if (api) delete api.defaults.headers.common['Authorization'];
     
     setAuth({ isAuth: false, perfil: '', asiloId: null });
-    setCurrentScreen(SCREENS.LOGIN); 
+    setCurrentScreen(SCREENS.LOGIN); // Volta para o Login Limpo
   }, []);
 
   const renderContent = () => {
@@ -80,9 +81,7 @@ function App() {
       case SCREENS.ADMIN_SETUP:
         return (
           <AdminSetup 
-            // ⚠️ MODIFICAÇÃO: Após terminar o setup, força logout em vez de ir pra Dash vazia
             onFinish={handleLogoutGlobal} 
-            // ⚠️ MODIFICAÇÃO: Botão Sair faz logout completo
             onLogout={handleLogoutGlobal} 
           />
         );
@@ -118,15 +117,33 @@ function App() {
         return <AlterarSenha onSucesso={() => setCurrentScreen(SCREENS.LOGIN)} onVoltar={() => setCurrentScreen(SCREENS.RECUPERAR)} />;
       
       default:
-        return <Home onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} />;
+        return (
+          <Home 
+            onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} 
+            onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} 
+            secaoParaRolar={secaoScroll} // Prop do BUG-06
+            resetarScroll={() => setSecaoScroll(null)} // Prop do BUG-06
+          />
+        );
     }
   };
 
   return (
-    <ToastProvider>
-      <Navbar onNavigate={(screen) => setCurrentScreen(screen)} currentScreen={currentScreen} />
-      {renderContent()}
-    </ToastProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ToastProvider>
+        <div className="App">
+          <Navbar 
+            onNavigate={(tela, secao) => {
+              setCurrentScreen(tela);
+              if (secao) setSecaoScroll(secao); // Lógica de scroll na navegação
+            }} 
+            currentScreen={currentScreen} 
+          />
+          {renderContent()}
+        </div>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 
