@@ -8,11 +8,11 @@ export default function Navbar({ onNavigate, currentScreen }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width:900px)");
 
-  // Esconde a Navbar se estiver no Dashboard ou AdminSetup para não poluir a tela
   if (currentScreen === 'painel' || currentScreen === 'admin_setup') return null;
 
-  const handleLinkClick = (screen) => {
-    onNavigate(screen);
+  // 1. Atualize o handleLinkClick para aceitar a seção (opcional)
+  const handleLinkClick = (screen, section) => {
+    onNavigate(screen, section); // Passa os dois para o App.js
     setDrawerOpen(false);
   };
 
@@ -33,8 +33,10 @@ export default function Navbar({ onNavigate, currentScreen }) {
           <Box sx={{ display: "flex", gap: 2 }}>
             <Button onClick={() => onNavigate('lojinha')} sx={navButtonStyle}>Solicitar adesão</Button>
             <Button onClick={() => onNavigate('login')} sx={navButtonStyle}>Sou Cliente</Button>
-            <Button onClick={() => onNavigate('home')} sx={navButtonStyle}>Sobre nós</Button>
-            <Button onClick={() => onNavigate('home')} sx={navButtonStyle}>Contato</Button>
+            
+            {/* 2. AQUI ESTÁ O CONCERTO: Passando o ID da seção como segundo parâmetro */}
+            <Button onClick={() => onNavigate('home', 'sobre-nos')} sx={navButtonStyle}>Sobre nós</Button>
+            <Button onClick={() => onNavigate('home', 'contato')} sx={navButtonStyle}>Contato</Button>
           </Box>
         ) : (
           <IconButton onClick={() => setDrawerOpen(true)} sx={{ color: "#1a3d0a" }}>
@@ -45,6 +47,7 @@ export default function Navbar({ onNavigate, currentScreen }) {
         <AppDrawer 
           open={drawerOpen} 
           onClose={() => setDrawerOpen(false)} 
+          // 3. Garanta que o Drawer também saiba navegar com seções
           onNav={handleLinkClick} 
         />
       </Toolbar>

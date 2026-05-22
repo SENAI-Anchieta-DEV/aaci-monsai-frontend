@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../assets/logos/Logo_nome.png";
 import logoCompleta from "../assets/logos/Logo_completa.png";
 import idosoFeliz from "../assets/images/idoso_feliz_2.png";
@@ -51,12 +51,28 @@ function ImgPlaceholder({ label, height = 200 }) {
     </Box>
   );
 }
-
-export default function Home({ onIrParaLogin, onIrParaLojinha }) {
+// ─── COMPONENTE HOME ──────────────────────────────────────────────────────────
+export default function Home({ onIrParaLogin, onIrParaLojinha, secaoParaRolar, resetarScroll }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [email, setEmail]           = useState("");
+  const [email, setEmail] = useState("");
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const showToast = useToast();
+
+  // ── LOGICA DE CORREÇÃO DO BUG-06 ──
+  useEffect(() => {
+    if (secaoParaRolar) {
+      // O timeout de 100ms garante que o DOM já foi renderizado antes de tentar o scroll
+      const timer = setTimeout(() => {
+        const elemento = document.getElementById(secaoParaRolar);
+        if (elemento) {
+          elemento.scrollIntoView({ behavior: "smooth", block: "start" });
+          // Limpa o estado no App.js para que o scroll funcione de novo se clicado
+          if (resetarScroll) resetarScroll();
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [secaoParaRolar, resetarScroll]);
 
   const handleNav = (link) => {
     setDrawerOpen(false);
@@ -258,7 +274,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
                     transition: "all 0.2s ease-in-out",
                     "&:hover": { 
                       bgcolor: "rgba(255,255,255,0.2)",
-                      transform: "translateY(-2px)" // Efeito sutil de levantar ao passar o mouse
+                      transform: "translateY(-2px)" 
                     },
                   }}
                 >
@@ -342,6 +358,6 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
         </Box>
       </Box>
 
-          </ThemeProvider>
+    </ThemeProvider>
   );
-}
+};

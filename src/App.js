@@ -29,6 +29,7 @@ const SCREENS = {
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState(SCREENS.HOME);
+  const [secaoScroll, setSecaoScroll] = useState(null);
   const [auth, setAuth] = useState({ isAuth: false, perfil: '', asiloId: null });
   const [qty, setQty] = useState(1);
 
@@ -104,7 +105,7 @@ function App() {
         return <AlterarSenha onSucesso={() => setCurrentScreen(SCREENS.LOGIN)} onVoltar={() => setCurrentScreen(SCREENS.RECUPERAR)} />;
       
       default:
-        return <Home onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} />;
+        return <Home onIrParaLogin={() => setCurrentScreen(SCREENS.LOGIN)} onIrParaLojinha={() => setCurrentScreen(SCREENS.LOJINHA)} secaoParaRolar={secaoScroll} resetarScroll={() => setSecaoScroll(null)} />;
     }
   };
 
@@ -115,9 +116,13 @@ function App() {
       <div className="App">
         {/* A Navbar inserida no topo de forma global */}
         <Navbar 
-          onNavigate={(tela) => setCurrentScreen(tela)} 
-          currentScreen={currentScreen} 
-        />
+        // Agora aceita dois parâmetros: para qual tela ir e, opcionalmente, qual seção rolar
+           onNavigate={(tela, secao) => {
+           setCurrentScreen(tela);
+            if (secao) setSecaoScroll(secao);
+    }} 
+  currentScreen={currentScreen} 
+/>
         
         {renderContent()}
       </div>
