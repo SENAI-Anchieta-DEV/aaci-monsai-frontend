@@ -12,18 +12,18 @@ import LogoutIcon         from '@mui/icons-material/Logout';
 import ElderlyIcon        from '@mui/icons-material/Elderly';
 import ReportProblemIcon  from '@mui/icons-material/ReportProblem';
 import ApartmentIcon      from '@mui/icons-material/Apartment';
-import SearchIcon         from '@mui/icons-material/Search';
 
 import Monitoramento     from './Monitoramento';
 import CadastrarUsuario  from './CadastrarUsuario';
 import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
-import HistoricoAlertas from './HistoricoAlertas';
-import MinhaConta       from './MinhaConta';
-import { useAuth }      from '../hooks/useAuth';
+import HistoricoAlertas  from './HistoricoAlertas';
+import MinhaConta        from './MinhaConta';
+import LocalizarIdoso    from './LocalizarIdoso'; // ✅ Resgatado da AACI-220
+import { useAuth }       from '../hooks/useAuth';
 
-// ─── Configuração do menu ─────────────────────────────────────────────────────
+// ─── Configuração do menu unificada ──────────────────────────────────────────
 const MENU_ITEMS = [
   {
     id: 'monitoramento',
@@ -61,7 +61,6 @@ const MENU_ITEMS = [
     icon: <ReportProblemIcon />,
     perfisPermitidos: ['GESTOR', 'CUIDADOR', 'ENFERMEIRO', 'SUPER_ADMIN', 'FAMILIAR'],
   },
-  // ✅ Exclusivo do SUPER_ADMIN
   {
     id: 'gerenciar_asilos',
     label: 'Gerenciar Unidades',
@@ -78,6 +77,7 @@ const LABEL_PERFIL = {
   SUPER_ADMIN: 'Admin',
 };
 
+// ─── Injeção dinâmica de componentes na viewport principal ───────────────────
 const renderizarTela = (telaAtiva, asiloId) => {
   const telas = {
     monitoramento:    <Monitoramento />,
@@ -86,9 +86,10 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
-    localizar:        <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Tela Localizar em breve</Typography>,
+    localizar:        <LocalizarIdoso />, // ✅ Integrado o componente real de geolocalização por mapa
     historico_alertas: <HistoricoAlertas asiloId={asiloId} />,
   };
+
   return telas[telaAtiva]
     ?? <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Erro 404: Página não encontrada</Typography>;
 };
@@ -104,8 +105,12 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
     item.perfisPermitidos.includes(perfilNormalizado)
   );
 
-  const handleNavegar = (idTela) => { setTelaAtiva(idTela); setDrawerOpen(false); };
-  const tituloPainel  = LABEL_PERFIL[perfilNormalizado] || 'Usuário';
+  const handleNavegar = (idTela) => { 
+    setTelaAtiva(idTela); 
+    setDrawerOpen(false); 
+  };
+  
+  const tituloPainel = LABEL_PERFIL[perfilNormalizado] || 'Usuário';
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f4f7f1' }}>

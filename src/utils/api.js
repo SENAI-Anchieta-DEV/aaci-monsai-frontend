@@ -1,14 +1,22 @@
 // ─── Cliente HTTP centralizado do projeto MONSAI ─────────────────────────────
 import axios from "axios";
 
+/**
+ * Configuração de ambiente do Axios.
+ * Para rodar localmente com o Spring Boot, mantenha a linha do localhost ativa.
+ * Para subir o build final ao ambiente de produção, comente o localhost e ative o Render.
+ */
 const api = axios.create({
-  baseURL: "http://localhost:8080", // 🔌 Sempre HTTP puro para desenvolvimento local
+  baseURL: "http://localhost:8080", // 🔌 Desenvolvimento Local
+  // baseURL: "https://aaci-monsai-backend-mrxp.onrender.com", // 🚀 Produção (Render)
 });
 
 // Injeta o Bearer Token em todas as requisições automaticamente
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
@@ -20,7 +28,8 @@ api.interceptors.response.use(
       const originalRequest = error.config;
       const originalUrl = originalRequest.url || "";
       
-      // 🚨 BLINDAGEM: Não reseta a sessão se o erro ocorrer nas telas de validação de credenciais primárias
+      // 🚨 BLINDAGEM: Não reseta a sessão se o erro ocorrer nas rotas de validação primárias
+      // Isso impede que a checagem imediata de perfil limpe o login do usuário por delay de sincronia
       const isAuthPath = originalUrl.includes("/auth/login") || originalUrl.includes("/usuarios");
       
       if (!isAuthPath) {

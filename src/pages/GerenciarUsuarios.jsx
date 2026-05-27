@@ -41,7 +41,6 @@ const UsuarioCard = ({ usuario, onAlterarSenha, onInativar, onVincular, onDesvin
               </IconButton>
             </Tooltip>
             <Tooltip title={ehVoce ? "Você não pode remover a si mesmo" : "Remover Acesso"}>
-              {/* Span necessário para o Tooltip funcionar em botão desabilitado */}
               <span>
                 <IconButton
                   onClick={() => onInativar(resolverIdUsuario(usuario), usuario.nome)}
@@ -90,7 +89,6 @@ export default function GerenciarUsuarios({ asiloId }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const showToast = useToast();
 
-  // ID do usuário logado — usado para bloquear auto-deleção
   const idLogado = Number(localStorage.getItem('usuarioId')) || null;
 
   // ─── Busca de dados ──────────────────────────────────────────────────────
@@ -112,7 +110,7 @@ export default function GerenciarUsuarios({ asiloId }) {
   const carregarIdosos = async () => {
     try {
       const res = await api.get('/idosos');
-      setListaIdosos(res.data);
+      setListaIdosos(res.data.filter(i => i.ativo)); // Mantém apenas idosos ativos na listagem de vínculo
     } catch (err) {
       console.error("Erro ao carregar idosos", err);
     }
@@ -125,7 +123,6 @@ export default function GerenciarUsuarios({ asiloId }) {
 
   // ─── Ações ───────────────────────────────────────────────────────────────
   const handleInativar = async (id, nome) => {
-    // ✅ Bloqueia auto-deleção — compara com o ID do usuário logado
     if (id === idLogado) {
       showToast({
         type: "error",
@@ -160,9 +157,10 @@ export default function GerenciarUsuarios({ asiloId }) {
     }
     const idAlvo = resolverIdUsuario(usuarioSelecionado);
     try {
+      // ✅ Payload corrigido para corresponder ao DTO do Spring Boot
       await api.patch(`/usuarios/${idAlvo}/senha`, { senha: novaSenha });
       setModalSenhaAberto(false);
-      showToast({ type: "success", title: "Senha atualizada!", message: `Senha de ${usuarioSelecionado.nome} atualizada.` });
+      showToast({ type: "success", title: "Senha updated!", message: `Senha de ${usuarioSelecionado.nome} alterada com sucesso.` });
     } catch (err) {
       const msgErro = err.response?.data?.detail || err.response?.data?.message || "Erro interno";
       showToast({ type: "error", title: "Erro ao atualizar senha", message: msgErro });
@@ -175,6 +173,7 @@ export default function GerenciarUsuarios({ asiloId }) {
       await api.post(`/usuarios/${idUsuario}/idosos/${idosoSelecionado}`, {});
       showToast({ type: "success", title: "Vinculado!", message: "Idoso vinculado com sucesso." });
       setModalVinculoAberto(false);
+      setIdosoSelecionado(''); // Limpa seleção residual
       carregarUsuarios();
     } catch (err) {
       showToast({ type: "error", title: "Erro ao vincular", message: err.response?.data?.detail || "Erro desconhecido" });
@@ -186,18 +185,19 @@ export default function GerenciarUsuarios({ asiloId }) {
     try {
       await api.delete(`/usuarios/${idUsuario}/idosos/${idIdoso}`);
       showToast({ type: "success", title: "Vínculo removido!", message: "O vínculo foi desfeito com sucesso." });
+      setModalDesvinculoAberto(false);
+      setIdosoSelecionado(''); // Limpa seleção residual
       carregarUsuarios();
     } catch (err) {
       showToast({ type: "error", title: "Erro ao desvincular", message: err.response?.data?.message || "Erro interno" });
     }
   };
 
-  const abrirModalVinculo    = (usuario) => { setUsuarioSelecionado(usuario); setModalVinculoAberto(true); };
-  const abrirModalDesvinculo = (usuario) => { setUsuarioSelecionado(usuario); setModalDesvinculoAberto(true); };
+  const abrirModalVinculo    = (usuario) => { setUsuarioSelecionado(usuario); setIdosoSelecionado(''); setModalVinculoAberto(true); };
+  const abrirModalDesvinculo = (usuario) => { setUsuarioSelecionado(usuario); setIdosoSelecionado(''); setModalDesvinculoAberto(true); };
 
   const idososJaVinculados = usuarioSelecionado?.idosos || [];
 
-  // ─── Render ──────────────────────────────────────────────────────────────
   return (
     <Box component="section" sx={{ maxWidth: 1000, mx: 'auto', mt: 2, px: { xs: 1, sm: 2 } }}>
       <Typography component="h2" variant="h5" sx={{ mb: 3, color: '#1a3d0a', fontWeight: 'bold' }}>
@@ -276,7 +276,7 @@ export default function GerenciarUsuarios({ asiloId }) {
                           </Tooltip>
 
                           {ehFamiliar(usuario.tipo) && (
-                            <Box sx={{ display: 'inline-flex', gap: 1 }}>
+                            <Box sx={{ display: 'inline-flex', gap: 1, mx: 1 }}>
                               <Button size="small" variant="outlined" onClick={() => abrirModalVinculo(usuario)}>
                                 Vincular
                               </Button>
@@ -363,10 +363,7 @@ export default function GerenciarUsuarios({ asiloId }) {
         <DialogActions>
           <Button onClick={() => setModalDesvinculoAberto(false)}>Cancelar</Button>
           <Button variant="contained" color="error" disabled={!idosoSelecionado}
-            onClick={() => {
-              handleDesvincular(resolverIdUsuario(usuarioSelecionado), idosoSelecionado);
-              setModalDesvinculoAberto(false);
-            }}>
+            onClick={() => handleDesvincular(resolverIdUsuario(usuarioSelecionado), idosoSelecionado)}>
             Desvincular
           </Button>
         </DialogActions>

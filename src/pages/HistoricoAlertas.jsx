@@ -33,24 +33,40 @@ useEffect(() => {
 }, []);
 
     // 2. Conexão WebSocket para receber alertas na mesma hora
-    useEffect(() => {
-        const stompClient = new Client({
-            // Ajuste a URL base do seu servidor backend
-            webSocketFactory: () => new SockJS('http://localhost:8080/ws-monsai'),
-            onConnect: () => {
-                console.log("Conectado ao WebSocket de Alertas!");
-                stompClient.subscribe('/topic/alertas', (mensagem) => {
-                    const novoAlerta = JSON.parse(mensagem.body);
-                    
-                    // Adiciona o novo alerta no topo da lista (aba Novos)
-                    setAlertas(prevAlertas => [novoAlerta, ...prevAlertas]);
-                });
-            }
-        });
-        stompClient.activate();
-        return () => stompClient.deactivate();
-    }, []);
+useEffect(() => {
+    // 1. Define as URLs (Mude o final para /ws ou o endpoint que definiu no Spring)
+    const LOCAL_URL = 'http://localhost:8080/'; 
+    const RENDER_URL = 'https://aaci-monsai-backend-mrxp.onrender.com/ws';
 
+    // 2. Verifica se o seu app está rodando localmente
+    const isLocal = window.location.hostname === "localhost";
+    const socketUrl = isLocal ? LOCAL_URL : RENDER_URL;
+
+    console.log(`🔌 Tentando conexão WebSocket em: ${socketUrl}`);
+
+    const stompClient = new Client({
+        webSocketFactory: () => new SockJS(socketUrl),
+        onConnect: () => {
+            console.log("✅ Conectado ao WebSocket de Alertas!");
+            stompClient.subscribe('/topic/alertas', (mensagem) => {
+                const novoAlerta = JSON.parse(mensagem.body);
+                setAlertas(prevAlertas => [novoAlerta, ...prevAlertas]);
+            });
+        },
+        onStompError: (frame) => {
+            console.error('❌ Erro no STOMP:', frame.headers['message']);
+        },
+        onWebSocketClose: () => {
+            console.warn('⚠️ Conexão WebSocket fechada.');
+        }
+    });
+
+    stompClient.activate();
+
+    return () => {
+        if (stompClient) stompClient.deactivate();
+    };
+}, []);
     // 3. Regra dos 10 Minutos (Move automaticamente para aba "Antigos")
    const agora = new Date().getTime();
 
