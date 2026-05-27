@@ -4,16 +4,19 @@ import {
   Box, Stepper, Step, StepLabel, Button, Typography, 
   TextField, Paper, Container, Divider 
 } from "@mui/material";
+// Importando o seu context
+import { useToast } from '../components/ToastContext'; 
+
 import { validarNome, validarEmail, validarCPF, validarSenha, coletarErros } from '../utils/validators';
 import { mascararCPF, mascararCNPJ } from '../utils/masks';
 import api from '../utils/api';
 
 // ─── Formulário do Gestor (Passo 2) ──────────────────────────────────────────
 export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
+  const showToast = useToast(); 
   const [gestor, setGestor] = useState({ nome: '', email: '', senha: '', cpf: '' });
   const [erros, setErros] = useState({});
 
-  // Submete os dados para configuração final do asilo
   const handleSubmit = async () => {
     const novosErros = coletarErros({
       nome:  validarNome(gestor.nome),
@@ -30,33 +33,30 @@ export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
     try {
       await api.post("/usuarios", { ...gestor, tipoUsuario: "GESTOR", asiloId });
 
-      alert("Configuração finalizada com sucesso! Faça Login novamente.");
+      showToast({
+        type: "success",
+        title: "Sucesso!",
+        message: "Configuração finalizada. Por favor, faça login novamente."
+      });
+      
       if (onFinish) onFinish();
 
     } catch (error) {
       console.error("Erro na requisição:", error.response?.data || error.message);
 
-      if (error.response) {
-        const mensagem = error.response.data.detail || error.response.data.message || "Verifique se CPF ou Email já estão cadastrados.";
-        alert(mensagem);
-      } else {
-        // Trata falhas de rede ou interrupções abruptas
-        alert("Erro interno no sistema. Verifique o console.");
-      }
+      const mensagem = error.response?.data?.detail || error.response?.data?.message || "Verifique se CPF ou Email já estão cadastrados.";
+      
+      showToast({
+        type: "error",
+        title: "Erro no Cadastro",
+        message: mensagem
+      });
     }
   };
 
   return (
-    <Box
-      component="section"
-      aria-labelledby="titulo-passo-gestor"
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}
-    >
-      <Typography
-        id="titulo-passo-gestor"
-        variant="subtitle1"
-        sx={{ fontWeight: 600, color: '#1a3d0a' }}
-      >
+    <Box component="section" sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 3 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1a3d0a' }}>
         Passo 2: Cadastro do Gestor Responsável
       </Typography>
 
@@ -104,6 +104,7 @@ export const FormularioCadastroGestor = ({ asiloId, onFinish }) => {
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export default function OnBoardingAdmin({ onFinish, onLogout }) {
+  const showToast = useToast();
   const [activeStep, setActiveStep] = useState(0);
   const [asiloData, setAsiloData] = useState({ nome: '', cnpj: '', endereco: '' });
   const [asiloId, setAsiloId] = useState(null);
@@ -124,29 +125,30 @@ export default function OnBoardingAdmin({ onFinish, onLogout }) {
 
     try {
       const res = await api.post("/asilos", asiloData);
-      // Garante que pegamos o ID vindo do banco
       setAsiloId(res.data.id || res.data.asilo_id);
+      
+      showToast({
+        type: "success",
+        title: "Unidade Criada",
+        message: "Agora cadastre o gestor da unidade."
+      });
+      
       setActiveStep(1);
     } catch (error) {
       console.error("Erro ao criar asilo:", error);
-      alert("Erro ao criar asilo. Verifique se o CNPJ é válido ou se já existe.");
+      showToast({
+        type: "error",
+        title: "Falha na Criação",
+        message: "Verifique os dados da unidade ou se o CNPJ já existe."
+      });
     }
   };
 
   return (
-    <Box
-      component="main"
-      sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: 'flex', alignItems: 'center', py: 4 }}
-    >
+    <Box component="main" sx={{ minHeight: "100vh", bgcolor: "#c8ddb8", display: 'flex', alignItems: 'center', py: 4 }}>
       <Container maxWidth="sm">
-        <Paper
-          component="article"
-          elevation={6}
-          sx={{ p: 5, borderRadius: '20px', textAlign: 'center' }}
-        >
-          <Typography variant="h4" sx={{ color: "#2d5a27", fontWeight: 800, mb: 1 }}>
-            MONSAI
-          </Typography>
+        <Paper elevation={6} sx={{ p: 5, borderRadius: '20px', textAlign: 'center' }}>
+          <Typography variant="h4" sx={{ color: "#2d5a27", fontWeight: 800, mb: 1 }}>MONSAI</Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
             Configuração Inicial de Nova Unidade
           </Typography>
@@ -160,11 +162,7 @@ export default function OnBoardingAdmin({ onFinish, onLogout }) {
           </Stepper>
 
           {activeStep === 0 ? (
-            <Box
-              component="form"
-              aria-label="Dados do Asilo"
-              sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-            >
+            <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
                 label="Nome da Unidade (Asilo)" fullWidth
                 value={asiloData.nome}

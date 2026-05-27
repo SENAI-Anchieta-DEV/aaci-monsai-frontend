@@ -5,10 +5,10 @@ export default function Lojinha({ onComprar }) {
   const [qty, setQty] = useState(1);
 
   return (
-    <Box sx={{ minHeight: "calc(100vh - 64px)", bgcolor: "#f5f5f5", display: "flex", alignItems: "center" }}>
+    <Box sx={{ minHeight: "calc(100vh - 64px)", bgcolor: "#c8ddb8", display: "flex", alignItems: "center" }}>
       <Container maxWidth="md" sx={{ py: 4 }}>
         <Box sx={{
-          bgcolor: "#f0f0f0", borderRadius: 3, p: { xs: 3, md: 4 },
+          bgcolor: "#CCE5C1", borderRadius: 3, p: { xs: 3, md: 4 },
           display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 4,
           boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
         }}>
