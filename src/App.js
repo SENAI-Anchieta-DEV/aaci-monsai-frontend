@@ -12,6 +12,7 @@ import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
 import Navbar from './components/Navbar'; //
+import GlobalAlertListener from './components/GlobalAlertListerner';
 import { ToastProvider } from './components/ToastContext';
 
 const SCREENS = {
@@ -113,12 +114,15 @@ function App() {
   return (
     <ToastProvider>
       <div className="App">
-        {/* A Navbar inserida no topo de forma global */}
+        {/* Navbar inserida no topo de forma global */}
         <Navbar 
           onNavigate={(tela) => setCurrentScreen(tela)} 
           currentScreen={currentScreen} 
         />
         
+        {/* Se o usuário estiver autenticado, a conexão com o broker de emergência é aberta */}
+        {auth.isAuth && <GlobalAlertListener />}
+
         {renderContent()}
       </div>
     </ToastProvider>

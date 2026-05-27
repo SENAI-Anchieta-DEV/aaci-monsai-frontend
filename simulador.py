@@ -14,7 +14,7 @@ def gerar_telemetria(is_anomalia):
     queda = True if is_anomalia and random.choice([True, False]) else False
 
     return {
-        "idoso_id": 2,
+        "idoso_id": 1,
         "pulseira_id": "MON-314", # Ajuste para o serial que está no seu banco
         "data_hora": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "sinal_vital": {
