@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { useToast } from "../components/ToastContext";
-import api from "../utils/api";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Box, Button, TextField, Typography, Paper, AppBar, Toolbar } from "@mui/material";
+import React, { useState } from 'react';
+import { 
+  Box, Typography, Paper, TextField, Button, AppBar, Toolbar, ThemeProvider, createTheme 
+} from '@mui/material';
 import logo from "../assets/logos/Logo_nome.png";
 import { useToast } from "../components/ToastContext";
 import api from "../utils/api";
@@ -48,7 +47,8 @@ export default function AlterarSenha({ onSucesso, onVoltar }) {
  
     setLoading(true);
     try {
-      await api.patch(`/usuarios/${usuarioId}/senha`, { novaSenha });
+      // ✅ Payload corrigido para corresponder ao DTO do Spring Boot ('senha')
+      await api.patch(`/usuarios/${usuarioId}/senha`, { senha: novaSenha });
  
       showToast({ type: "success", title: "Senha alterada!", message: "Sua nova senha está ativa. Faça login." });
       localStorage.removeItem("recoveryEmail");
