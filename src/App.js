@@ -12,9 +12,12 @@ import AlterarSenha from './pages/AlterarSenha';
 import Pagamento from './pages/Pagamento';
 import Dashboard from './pages/Dashboard';
 import AdminSetup from './pages/AdminSetup';
-import Navbar from './components/Navbar'; //
-import GlobalAlertListener from './components/GlobalAlertListerner';
+import Navbar from './components/Navbar'; 
+import theme from './components/createTheme';
 import { ToastProvider } from './components/ToastContext';
+
+// 🚨 IMPORT CORRIGIDO: Apontando exatamente para o arquivo gerado pelo merge com o "r" extra
+import GlobalAlertListener from './components/GlobalAlertListerner';
 
 const SCREENS = {
   HOME: 'home',
@@ -54,28 +57,30 @@ function App() {
   }, [applyAuth]);
 
   const handleLoginSuccess = (dados) => {
+    if (!dados) return;
+    
     localStorage.setItem('token', dados.token);
     localStorage.setItem('tipoPerfil', dados.tipoPerfil);
     localStorage.setItem('usuarioId', dados.usuarioId);
     localStorage.setItem('nomeUsuario', dados.nome);
     localStorage.setItem('emailUsuario', dados.email || '');
     localStorage.setItem('cpfUsuario', dados.cpf || '');
-    localStorage.setItem('asiloId', dados.asilo?.id || dados.asiloId);
+    localStorage.setItem('asiloId', dados.asiloId || '');
     
-    applyAuth(dados.token, dados.tipoPerfil, dados.asilo?.id || dados.asiloId);
+    applyAuth(dados.token, dados.tipoPerfil, dados.asiloId);
   };
 
   const handleLogout = () => {
     localStorage.clear(); 
     delete axios.defaults.headers.common['Authorization'];
-    setAuth({ isAuth: false, perfil: '' });
+    setAuth({ isAuth: false, perfil: '', asiloId: null });
     setCurrentScreen(SCREENS.HOME);
   };
 
   const renderContent = () => {
     switch (currentScreen) {
       case SCREENS.ADMIN_SETUP:
-        return <AdminSetup onFinish={handleLogout} onLogout={handleLogout} />;
+        return <AdminSetup onFinish={() => setCurrentScreen(SCREENS.DASHBOARD)} onLogout={handleLogout} />;
       
       case SCREENS.DASHBOARD:
         return <Dashboard perfil={auth.perfil} asiloId={auth.asiloId} onLogout={handleLogout} />;
@@ -113,20 +118,22 @@ function App() {
   };
 
   return (
-    <ToastProvider>
-      <div className="App">
-        {/* Navbar inserida no topo de forma global */}
-        <Navbar 
-          onNavigate={(tela) => setCurrentScreen(tela)} 
-          currentScreen={currentScreen} 
-        />
-        
-        {/* Se o usuário estiver autenticado, a conexão com o broker de emergência é aberta */}
-        {auth.isAuth && <GlobalAlertListener />}
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <ToastProvider>
+        <div className="App">
+          <Navbar 
+            onNavigate={(tela) => setCurrentScreen(tela)} 
+            currentScreen={currentScreen} 
+          />
+          
+          {/* O Ouvinte Global agora está envelopado e protegido pelo Contexto de Design */}
+          {auth.isAuth && <GlobalAlertListener />}
 
-        {renderContent()}
-      </div>
-    </ToastProvider>
+          {renderContent()}
+        </div>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
 
