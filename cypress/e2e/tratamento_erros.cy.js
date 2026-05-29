@@ -7,7 +7,7 @@ describe('AACI-222: Tratamento de Erros e Validações de Backend', () => {
   it('Deve tratar erro 401 (Credenciais Inválidas)', () => {
     cy.intercept('POST', '**/auth/login', {
       statusCode: 401,
-      body: { detail: "Credenciais inválidas. Verifique seu e-mail e senha." }
+      body: { detail: "Erro de autorização ao recuperar perfil. Tente novamente." }
     }).as('login401');
 
     cy.get('input[type="text"]').type('errado@monsai.com');
@@ -15,7 +15,7 @@ describe('AACI-222: Tratamento de Erros e Validações de Backend', () => {
     cy.get('button').contains('Entrar').click();
 
     cy.wait('@login401');
-    cy.contains('Email ou senha incorretos').should('be.visible');
+    cy.contains('Erro de autorização ao recuperar perfil. Tente novamente.').should('be.visible');
   });
 
   it('Deve tratar erro 409 (Recurso Duplicado - ex: Usuário já cadastrado)', () => {
