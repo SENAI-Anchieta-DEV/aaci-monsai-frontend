@@ -62,43 +62,26 @@ export default function Login({ onLogin, onRecuperar }) {
     setLoading(true);
     
     try {
-      // ✅ 1. Faz o POST inicial para pegar o Token e o Tipo de Perfil
+      // ✅ 1. Faz o POST inicial e captura TODA a resposta do Backend (Token + Dados do Usuário)
       const responseAuth = await api.post("/auth/login", {
         email: credential,
         senha: password,
       });
 
-      const tokenGerado = responseAuth.data.token || responseAuth.data.accessToken;
-      const perfilGerado = responseAuth.data.tipoPerfil;
+      const dados = responseAuth.data;
 
-      // ✅ 2. Busca a lista de usuários passando o token explicitamente no header local
-      const { data: listaUsuarios } = await api.get("/usuarios", {
-        headers: { Authorization: `Bearer ${tokenGerado}` },
-      });
-
-      // ✅ 3. Encontra o usuário real e captura o Nome, AsiloId e CPF
-      const usuarioLogado = listaUsuarios.find(
-        (u) => u.email.toLowerCase() === credential.toLowerCase()
-      );
-
-      if (!usuarioLogado) {
-        showToast({ type: "error", title: "Erro de Perfil", message: "Não encontramos seus dados de acesso." });
-        setLoading(false);
-        return;
-      }
-
-      // Monta o objeto completo e limpo esperado pelo App.js
+      // ✅ 2. Monta o objeto de sessão lendo direto do DTO retornado, SEM chamar /usuarios
       const dadosSessao = {
-        token: tokenGerado,
-        tipoPerfil: perfilGerado || usuarioLogado.tipoUsuario || "",
-        usuarioId: String(usuarioLogado.id),
-        asiloId: usuarioLogado.asilo?.id ? String(usuarioLogado.asilo.id) : "",
-        nome: usuarioLogado.nome || "",
-        email: usuarioLogado.email || "",
-        cpf: usuarioLogado.cpf || ""
+        token: dados.token || dados.accessToken,
+        tipoPerfil: dados.tipoPerfil || "",
+        usuarioId: dados.usuarioId ? String(dados.usuarioId) : "",
+        asiloId: dados.asiloId ? String(dados.asiloId) : "",
+        nome: dados.nome || "Usuário",
+        email: credential,
+        cpf: dados.cpf || ""
       };
 
-      // Grava no localStorage para consistência e persistência imediata
+      // ✅ 3. Grava no localStorage para consistência e persistência imediata
       localStorage.setItem("token",        dadosSessao.token);
       localStorage.setItem("tipoPerfil",   dadosSessao.tipoPerfil);
       localStorage.setItem("usuarioId",    dadosSessao.usuarioId);
@@ -114,9 +97,11 @@ export default function Login({ onLogin, onRecuperar }) {
 
     } catch (error) {
       localStorage.removeItem("token");
-      const msg = error.response?.status === 401 
-        ? "Erro de autorização ao recuperar perfil. Tente novamente."
-        : (error.response?.data?.message || "Email ou senha incorretos.");
+      
+      // Ajuste para capturar 401 ou 403 de forma genérica como erro de credencial
+      const msg = error.response?.status === 401 || error.response?.status === 403 
+        ? "Email ou senha incorretos."
+        : (error.response?.data?.message || "Erro de autorização ao entrar. Tente novamente.");
         
       showToast({ type: "error", title: "Falha no Login", message: msg });
     } finally {
