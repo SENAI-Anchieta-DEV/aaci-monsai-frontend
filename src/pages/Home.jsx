@@ -6,8 +6,7 @@ import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  Box, Button, Container, Typography, Grid,
-  TextField, useMediaQuery,
+ Box, Button, Container, Typography, Grid, TextField,
 } from "@mui/material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
@@ -50,9 +49,7 @@ function ImgPlaceholder({ label, height = 200 }) {
 }
 
 export default function Home({ onIrParaLogin, onIrParaLojinha }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [email, setEmail]           = useState("");
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const showToast = useToast();
 
   const handleNav = (link) => {
