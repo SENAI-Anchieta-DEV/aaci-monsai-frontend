@@ -52,11 +52,6 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
   const [email, setEmail]           = useState("");
   const showToast = useToast();
 
-  const handleNav = (link) => {
-   
-    if (link === "Sou Cliente")      onIrParaLogin();
-    if (link === "Solicitar adesão") onIrParaLojinha();
-  };
 
   const handleEnviarEmail = () => {
     if (!email || !email.includes("@")) {
