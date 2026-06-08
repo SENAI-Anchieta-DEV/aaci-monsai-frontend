@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Modal, Button } from "@mui/material";
 import {
   Grid, Card, CardContent, Typography, Box, IconButton, Chip, TextField, Divider
@@ -72,22 +72,22 @@ export default function Monitoramento() {
   const podeEditar = perfil === 'GESTOR' || perfil === 'ROLE_GESTOR';
 
   // ─── Busca de idosos ──────────────────────────────────────────────────────
-  const fetchIdosos = async () => {
-    try {
-      const endpoint = (perfil === 'FAMILIAR' || perfil === 'ROLE_FAMILIAR')
-        ? `/usuarios/${usuarioId}/idosos`
-        : '/idosos';
+  const fetchIdosos = useCallback(async () => {
+  try {
+    const endpoint = (perfil === 'FAMILIAR' || perfil === 'ROLE_FAMILIAR')
+      ? `/usuarios/${usuarioId}/idosos`
+      : '/idosos';
 
-      const response = await api.get(endpoint);
-      setIdosos(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar idosos", error);
-    }
-  };
+    const response = await api.get(endpoint);
+    setIdosos(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar idosos", error);
+  }
+}, [perfil, usuarioId]); 
 
   useEffect(() => {
-    fetchIdosos();
-  }, []);
+  fetchIdosos();
+}, [fetchIdosos]);
 
   // ─── Polling de telemetria a cada 3 segundos ──────────────────────────────
   // A rota /api/telemetria/ultima retorna a leitura mais recente de TODOS os

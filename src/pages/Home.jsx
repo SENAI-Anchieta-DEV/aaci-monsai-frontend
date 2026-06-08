@@ -12,7 +12,6 @@ import {
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import YouTubeIcon from '@mui/icons-material/YouTube';
-import MenuIcon from "@mui/icons-material/Menu";
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 
@@ -57,7 +56,7 @@ export default function Home({ onIrParaLogin, onIrParaLojinha }) {
   const showToast = useToast();
 
   const handleNav = (link) => {
-    setDrawerOpen(false);
+   
     if (link === "Sou Cliente")      onIrParaLogin();
     if (link === "Solicitar adesão") onIrParaLojinha();
   };

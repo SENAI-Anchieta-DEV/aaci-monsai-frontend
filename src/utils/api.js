@@ -7,8 +7,8 @@ import axios from "axios";
  * Para subir o build final ao ambiente de produção, comente o localhost e ative o Render.
  */
 const api = axios.create({
-  baseURL: "http://localhost:8080", // 🔌 Desenvolvimento Local
-  // baseURL: "https://aaci-monsai-backend-mrxp.onrender.com", // 🚀 Produção (Render)
+  // baseURL: "http://localhost:8080", // 🔌 Desenvolvimento Local
+   baseURL: "https://aaci-monsai-backend-mrxp.onrender.com", // 🚀 Produção (Render)
 });
 
 // Injeta o Bearer Token em todas as requisições automaticamente
