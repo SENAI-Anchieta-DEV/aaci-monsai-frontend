@@ -6,10 +6,8 @@ import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  AppBar, Toolbar, Box, Button, Container, Typography, Grid,
-  IconButton, Drawer, List, ListItem, ListItemButton, ListItemText,
+  Box, Button, Container, Typography, Grid,
   TextField, useMediaQuery,
-  Link,
 } from "@mui/material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
