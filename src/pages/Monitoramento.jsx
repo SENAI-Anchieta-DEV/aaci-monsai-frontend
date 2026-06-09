@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { Modal, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Modal, Button } from "@mui/material";
 import {
   Grid, Card, CardContent, Typography, Box, IconButton, Chip, TextField, Divider
 } from '@mui/material';
@@ -71,19 +70,22 @@ export default function Monitoramento() {
   const podeEditar = perfil === 'GESTOR' || perfil === 'ROLE_GESTOR';
 
   // ─── Busca de idosos ──────────────────────────────────────────────────────
-  const fetchIdosos = async () => {
-    try {
-      const endpoint = (perfil === 'FAMILIAR' || perfil === 'ROLE_FAMILIAR')
-        ? `/usuarios/${usuarioId}/idosos`
-        : '/idosos';
-      const response = await api.get(endpoint);
-      setIdosos(response.data);
-    } catch (error) {
-      console.error("Erro ao buscar idosos", error);
-    }
-  };
+  const fetchIdosos = useCallback(async () => {
+  try {
+    const endpoint = (perfil === 'FAMILIAR' || perfil === 'ROLE_FAMILIAR')
+      ? `/usuarios/${usuarioId}/idosos`
+      : '/idosos';
 
-  useEffect(() => { fetchIdosos(); }, []);
+    const response = await api.get(endpoint);
+    setIdosos(response.data);
+  } catch (error) {
+    console.error("Erro ao buscar idosos", error);
+  }
+}, [perfil, usuarioId]); 
+
+  useEffect(() => {
+  fetchIdosos();
+}, [fetchIdosos]);
 
   // ─── Polling de telemetria ────────────────────────────────────────────────
   useEffect(() => {
@@ -298,6 +300,7 @@ export default function Monitoramento() {
         </Box>
         <TextField
           label="Pesquisar por nome ou serial..."
+          inputProps={{ "data-cy": "input-pesquisa" }}
           variant="outlined" size="small"
           onChange={(e) => setTermoPesquisa(e.target.value)}
           sx={{ width: { xs: '100%', sm: 350 }, bgcolor: 'white', borderRadius: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}

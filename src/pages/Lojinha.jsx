@@ -15,7 +15,8 @@ export default function Lojinha({ onComprar, onVoltar, onLogin }) {
       <Container maxWidth="md" sx={{ py: 4 }}>
         
         {/* Barra superior de navegação local da Lojinha */}
-        <Box sx={{ display: "flex", justifyContent: "between", alignItems: "center", mb: 2, px: 1 }}>
+        {/* ✅ CORREÇÃO: De "between" para "space-between" */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2, px: 1 }}>
           <Button onClick={onVoltar} sx={{ color: "#2a5c14", fontWeight: 600, textTransform: "none" }}>
             ← Voltar para Home
           </Button>
@@ -32,7 +33,7 @@ export default function Lojinha({ onComprar, onVoltar, onLogin }) {
           boxShadow: "0 4px 20px rgba(0,0,0,0.05)"
         }}>
 
-          {/* Coluna Esquerda — Imagem e Compra (Corrigida sem duplicações) */}
+          {/* Coluna Esquerda — Imagem e Compra */}
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flex: 1 }}>
             <Box sx={{
               width: "100%", maxWidth: 220, aspectRatio: "1",
@@ -87,7 +88,7 @@ export default function Lojinha({ onComprar, onVoltar, onLogin }) {
             </Button>
           </Box>
 
-          {/* Coluna Direita — Descrição Técnica (Corrigida sem duplicações) */}
+          {/* Coluna Direita — Descrição Técnica */}
           <Box sx={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: 2 }}>
             <Typography variant="h6" sx={{ color: "#2a5c14", fontWeight: 700, borderBottom: "1px solid #b0cf9f", pb: 1 }}>
               Especificações Técnicas

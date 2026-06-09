@@ -15,7 +15,7 @@ def gerar_telemetria(is_anomalia):
 
     return {
         "idoso_id": 2,
-        "pulseira_id": "MON-314", # Ajuste para o serial que está no seu banco
+        "pulseira_id": "MON-313", # Ajuste para o serial que está no seu banco
         "data_hora": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "sinal_vital": {
             "sinal_vital_id": "SV-999",

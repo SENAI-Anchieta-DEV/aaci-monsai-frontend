@@ -1,70 +1,166 @@
-# Getting Started with Create React App
+# 🌿 Monsai — Frontend Web
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+<p align="center">
+  Aplicação web para monitoramento integrado da saúde do idoso, consumindo a API Monsai com autenticação segura e visualização em tempo real.
+</p>
 
-## Available Scripts
+<p align="center">
+  <img src="https://img.shields.io/badge/React-19-02502c?style=for-the-badge&logo=react"/>
+  <img src="https://img.shields.io/badge/Node.js-18+-227e35?style=for-the-badge&logo=node.js"/>
+  <img src="https://img.shields.io/badge/npm-9+-096732?style=for-the-badge&logo=npm"/>
+  <img src="https://img.shields.io/badge/Auth-JWT-5cb52d?style=for-the-badge"/>
+</p>
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 📌 Sobre o Projeto
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+O **Monsai Frontend Web** é a interface responsável por exibir os dados do sistema de monitoramento, permitindo o acompanhamento da saúde de idosos em tempo real.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+💡 Funcionalidades principais:
 
-### `npm test`
+* 📊 Visualização de dados em tempo real
+* 🔐 Autenticação segura com JWT
+* 📡 Integração com backend IoT
+* 🖥️ Interface moderna e responsiva
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🧠 Arquitetura de Integração
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```text
+[ Frontend React ]
+        │
+        ▼
+[ Monsai Backend API ]
+        │
+        ▼
+[ PostgreSQL + MQTT ]
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## ⚙️ Pré-requisitos
 
-### `npm run eject`
+Antes de rodar o projeto:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+* 🟢 Node.js 18+
+* 📦 npm 9+
+* 🌿 Backend Monsai rodando em `http://localhost:8080 || https://aaci-monsai-backend-mrxp.onrender.com/`
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 📁 Setup do Projeto
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 🔽 Clone
 
-## Learn More
+```bash
+git clone https://github.com/SENAI-Anchieta-DEV/aaci-monsai-frontend.git
+cd aaci-monsai-frontend
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🚀 Execução
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+npm install
+npm start
+```
 
-### Code Splitting
+A aplicação estará disponível em:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+👉 http://localhost:3000
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 📡 Integração com Backend
 
-### Making a Progressive Web App
+O frontend consome a API Monsai.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### 🔐 Autenticação JWT
 
-### Advanced Configuration
+Após login:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```text
+Authorization: Bearer seu_token
+```
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 📖 API Docs
 
-### `npm run build` fails to minify
+* Swagger: http://localhost:8080/swagger-ui/index.html
+* OpenAPI: http://localhost:8080/v3/api-docs
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## ▶️ Scripts Disponíveis
+
+| Comando       | Descrição       |
+| ------------- | --------------- |
+| npm start     | Desenvolvimento |
+| npm run build | Build produção  |
+| npm test      | Testes          |
+| npm run eject | Ejetar config   |
+
+---
+
+## 📚 Tecnologias
+
+| Tecnologia      | Função      |
+| --------------- | ----------- |
+| React 19        | UI          |
+| React Scripts   | Build       |
+| Testing Library | Testes      |
+| Web Vitals      | Performance |
+
+---
+
+## 🏗️ Build para Produção
+
+```bash
+npm run build
+```
+
+### Configurar produção:
+
+```env
+REACT_APP_API_URL=https://aaci-monsai-frontend.firebaseapp.com/
+```
+
+---
+
+## 🔗 Integração com Sistema Monsai
+
+Este frontend faz parte do ecossistema:
+
+* 📱 Mobile App
+* 💻 Frontend Web (este projeto)
+* 🤖 IoT
+* ☁️ Backend API
+
+---
+
+## 📌 Status
+
+🚧 Em desenvolvimento
+
+---
+
+## 👩‍💻 Autoria
+
+<p align="center">
+  <strong>Direitos totalmente reservados a:</strong>
+</p>
+
+<p align="center">
+  Allan Leal da Luz<br>
+  André Gondek Mendes<br>
+  Christian Soares Maia<br>
+  Izabella Carolina Hermano Alves
+</p>
+
+---
+
+## 📄 Licença
+
+Uso educacional.

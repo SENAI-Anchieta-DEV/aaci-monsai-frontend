@@ -94,7 +94,12 @@ function App() {
           <Lojinha 
             onVoltar={() => setCurrentScreen(SCREENS.HOME)} 
             onLogin={() => setCurrentScreen(SCREENS.LOGIN)} 
-            onComprar={(q) => { setQty(q); setCurrentScreen(SCREENS.PAGAMENTO); }} 
+            onComprar={(q) => { 
+              setQty(q); 
+              setTimeout(() => {
+                setCurrentScreen(SCREENS.PAGAMENTO);
+              }, 0);
+            }} 
           />
         );
       

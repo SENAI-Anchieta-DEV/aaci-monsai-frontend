@@ -6,8 +6,7 @@ import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
-  Box, Button, Container, Typography, Grid,
-  TextField, useMediaQuery,
+ Box, Button, Container, Typography, Grid, TextField,
 } from "@mui/material";
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
@@ -48,25 +47,10 @@ function ImgPlaceholder({ label, height = 200 }) {
   );
 }
 
-// ─── COMPONENTE HOME (Com lógica de scroll restaurada) ────────────────────────
-export default function Home({ onIrParaLogin, onIrParaLojinha, secaoParaRolar, resetarScroll }) {
-  const [email, setEmail] = useState("");
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+export default function Home({ onIrParaLojinha }) {
+  const [email, setEmail]           = useState("");
   const showToast = useToast();
 
-  // ── RECOUPERAÇÃO DA LÓGICA DO BUG-06 ──
-  useEffect(() => {
-    if (secaoParaRolar) {
-      const timer = setTimeout(() => {
-        const elemento = document.getElementById(secaoParaRolar);
-        if (elemento) {
-          elemento.scrollIntoView({ behavior: "smooth", block: "start" });
-          if (resetarScroll) resetarScroll();
-        }
-      }, 150); // 150ms para garantir que o DOM de SPAs pesadas carregue
-      return () => clearTimeout(timer);
-    }
-  }, [secaoParaRolar, resetarScroll]);
 
   const handleEnviarEmail = () => {
     if (!email || !email.includes("@")) {

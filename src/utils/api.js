@@ -2,14 +2,16 @@
 import axios from "axios";
 
 /**
- * Configuração do Axios apontando para o ambiente de produção (Render).
- * Caso precise testar localmente, altere para "http://localhost:8080".
+ * Configuração de ambiente do Axios.
+ * Para rodar localmente com o Spring Boot, mantenha a linha do localhost ativa.
+ * Para subir o build final ao ambiente de produção, comente o localhost e ative o Render.
  */
 const api = axios.create({
-  baseURL: "https://aaci-monsai-backend-mrxp.onrender.com", 
+  // baseURL: "http://localhost:8080", // 🔌 Desenvolvimento Local
+   baseURL: "https://aaci-monsai-backend-mrxp.onrender.com", // 🚀 Produção (Render)
 });
 
-// Injeta o Bearer Token em todas as requisições autenticadas automaticamente
+// Injeta o Bearer Token em todas as requisições automaticamente
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -18,16 +20,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Interceptor de resposta: se 401 (Sessão Expirada/Inválida), limpa a sessão
+// Interceptor de resposta: se 401, limpa sessão e recarrega de forma segura
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Verifica se o erro não veio da própria tentativa de login
-      const isLoginRequest = error.config?.url?.includes("/auth/login");
+      const originalRequest = error.config;
+      const originalUrl = originalRequest.url || "";
       
-      // Evita o recarregamento infinito se o erro 401 for apenas um erro de senha no login
-      if (!isLoginRequest) {
+      // 🚨 BLINDAGEM: Não reseta a sessão se o erro ocorrer nas rotas de validação primárias
+      // Isso impede que a checagem imediata de perfil limpe o login do usuário por delay de sincronia
+      const isAuthPath = originalUrl.includes("/auth/login") || originalUrl.includes("/usuarios");
+      
+      if (!isAuthPath) {
+        console.warn("🔒 Token expirado ou requisição inválida. Redirecionando para a área pública...");
         localStorage.clear();
         window.location.reload();
       }

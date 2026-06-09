@@ -62,44 +62,47 @@ export default function Login({ onLogin, onRecuperar }) {
     setLoading(true);
     
     try {
-      // ✅ 1. Faz o POST inicial apenas para pegar o Token e o Tipo de Perfil (Via API Central)
-      const { data: { token, tipoPerfil } } = await api.post("/auth/login", {
+      // ✅ 1. Faz o POST inicial e captura TODA a resposta do Backend (Token + Dados do Usuário)
+      const responseAuth = await api.post("/auth/login", {
         email: credential,
         senha: password,
       });
 
-      // ✅ 2. Busca a lista de usuários no banco local (Solução herdada da branch 259)
-      const { data: listaUsuarios } = await api.get("/usuarios", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const dados = responseAuth.data;
 
-      // ✅ 3. Encontra o usuário real e captura o Nome, AsiloId e CPF (Mata o erro de usuário fantasma)
-      const usuarioLogado = listaUsuarios.find(
-        (u) => u.email.toLowerCase() === credential.toLowerCase()
-      );
+      // ✅ 2. Monta o objeto de sessão lendo direto do DTO retornado, SEM chamar /usuarios
+      const dadosSessao = {
+        token: dados.token || dados.accessToken,
+        tipoPerfil: dados.tipoPerfil || "",
+        usuarioId: dados.usuarioId ? String(dados.usuarioId) : "",
+        asiloId: dados.asiloId ? String(dados.asiloId) : "",
+        nome: dados.nome || "Usuário",
+        email: credential,
+        cpf: dados.cpf || ""
+      };
 
-      if (!usuarioLogado) {
-        showToast({ type: "error", title: "Erro de Perfil", message: "Não encontramos seus dados de acesso." });
-        return;
-      }
+      // ✅ 3. Grava no localStorage para consistência e persistência imediata
+      localStorage.setItem("token",        dadosSessao.token);
+      localStorage.setItem("tipoPerfil",   dadosSessao.tipoPerfil);
+      localStorage.setItem("usuarioId",    dadosSessao.usuarioId);
+      localStorage.setItem("asiloId",      dadosSessao.asiloId);
+      localStorage.setItem("nomeUsuario",  dadosSessao.nome);
+      localStorage.setItem("emailUsuario", dadosSessao.email);
+      localStorage.setItem("cpfUsuario",   dadosSessao.cpf);
 
-      // ⚠️ Substitui a lógica de parseJwt pela gravação explícita para o App.js ler
-      localStorage.setItem("token",        token);
-      localStorage.setItem("tipoPerfil",   tipoPerfil || usuarioLogado.tipoUsuario || "");
-      localStorage.setItem("usuarioId",    String(usuarioLogado.id));
-      localStorage.setItem("asiloId",      usuarioLogado.asilo?.id ? String(usuarioLogado.asilo.id) : "");
-      localStorage.setItem("nomeUsuario",  usuarioLogado.nome || "");
-      localStorage.setItem("emailUsuario", usuarioLogado.email || "");
-      localStorage.setItem("cpfUsuario",   usuarioLogado.cpf || "");
-
-      showToast({ type: "success", title: "Bem-vindo!", message: `Olá, ${usuarioLogado.nome}!` });
+      showToast({ type: "success", title: "Bem-vindo!", message: `Olá, ${dadosSessao.nome}!` });
       
-      // Dispara o callback sem parâmetros para manter compatibilidade com o App.js da 163
-      onLogin();
+      // ✅ 4. Envia o objeto populado para o App.js realizar a mudança de tela
+      onLogin(dadosSessao);
 
     } catch (error) {
       localStorage.removeItem("token");
-      const msg = error.response?.data?.message || "Email ou senha incorretos.";
+      
+      // Ajuste para capturar 401 ou 403 de forma genérica como erro de credencial
+      const msg = error.response?.status === 401 || error.response?.status === 403 
+        ? "Email ou senha incorretos."
+        : (error.response?.data?.message || "Erro de autorização ao entrar. Tente novamente.");
+        
       showToast({ type: "error", title: "Falha no Login", message: msg });
     } finally {
       setLoading(false);

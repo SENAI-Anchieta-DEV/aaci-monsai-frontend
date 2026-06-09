@@ -13,18 +13,17 @@ import ElderlyIcon        from '@mui/icons-material/Elderly';
 import ReportProblemIcon  from '@mui/icons-material/ReportProblem';
 import ApartmentIcon      from '@mui/icons-material/Apartment';
 
-// Importações corrigidas apontando para a mesma pasta pages/
 import Monitoramento     from './Monitoramento';
 import CadastrarUsuario  from './CadastrarUsuario';
 import CadastrarIdoso    from './CadastrarIdoso';
 import GerenciarUsuarios from './GerenciarUsuarios';
 import GerenciarAsilos   from './GerenciarAsilos';  
-import MinhaConta       from './MinhaConta';
-import LocalizarIdoso    from './LocalizarIdoso.jsx';    // ✅ Integrado
-import HistoricoAlertas  from './HistoricoAlertas';  // ✅ Integrado
+import HistoricoAlertas  from './HistoricoAlertas';
+import MinhaConta        from './MinhaConta';
+import LocalizarIdoso    from './LocalizarIdoso'; // ✅ Resgatado da AACI-220
 import { useAuth }       from '../hooks/useAuth';
 
-// ─── Configuração do menu unificada (Nível de Acessos Coletivo + Super Admin) ─
+// ─── Configuração do menu unificada ──────────────────────────────────────────
 const MENU_ITEMS = [
   {
     id: 'monitoramento',
@@ -87,24 +86,22 @@ const renderizarTela = (telaAtiva, asiloId) => {
     gerenciar:        <GerenciarUsuarios asiloId={asiloId} />,
     gerenciar_asilos: <GerenciarAsilos />, 
     minha_conta:      <MinhaConta />,
-   localizar:         <LocalizarIdoso />,              // ✅ Componente real de Mapa
-    historico_alertas: <HistoricoAlertas asiloId={asiloId} />, // ✅ Componente real de Alertas
+    localizar:        <LocalizarIdoso />, // ✅ Integrado o componente real de geolocalização por mapa
+    historico_alertas: <HistoricoAlertas asiloId={asiloId} />,
   };
 
   return telas[telaAtiva]
     ?? <Typography variant="h5" sx={{ mt: 5, textAlign: 'center' }}>Erro 404: Página não encontrada</Typography>;
 };
 
-// ─── Componente Construtor do Dashboard ──────────────────────────────────────
+// ─── Componente Principal ─────────────────────────────────────────────────────
 export default function Dashboard({ perfil, asiloId, onLogout }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [telaAtiva, setTelaAtiva]   = useState('monitoramento');
   const { nome }                    = useAuth();
 
   const perfilNormalizado = (perfil?.toUpperCase() || '').replace('ROLE_', '');
-  
-  // Realiza a filtragem das opções do menu lateral dinamicamente em tempo de execução
-  const menuPermitido = MENU_ITEMS.filter((item) =>
+  const menuPermitido     = MENU_ITEMS.filter((item) =>
     item.perfisPermitidos.includes(perfilNormalizado)
   );
 
@@ -118,7 +115,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f4f7f1' }}>
 
-      {/* TOPBAR GLOBAL */}
+      {/* TOPBAR */}
       <AppBar component="header" position="fixed"
         sx={{ bgcolor: '#AED696', boxShadow: 'none', zIndex: (t) => t.zIndex.drawer + 1 }}>
         <Toolbar>
@@ -135,7 +132,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
         </Toolbar>
       </AppBar>
 
-      {/* DRAWER LATERAL NATIVO (MATERIAL UI) */}
+      {/* MENU LATERAL */}
       <Drawer component="nav" aria-label="Menu principal" variant="temporary"
         open={drawerOpen} onClose={() => setDrawerOpen(false)}
         sx={{ '& .MuiDrawer-paper': { width: 260, boxSizing: 'border-box',
@@ -191,7 +188,7 @@ export default function Dashboard({ perfil, asiloId, onLogout }) {
         </List>
       </Drawer>
 
-      {/* RENDERIZADOR DA VIEWPORT */}
+      {/* CONTEÚDO PRINCIPAL */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 12 }}>
         {renderizarTela(telaAtiva, asiloId)}
       </Box>
