@@ -117,7 +117,7 @@ export default function Login({ onLogin, onRecuperar }) {
           <Typography variant="h4" sx={{ color: "#1a3a16", fontWeight: 700, textAlign: "center", mb: 1 }}>Login</Typography>
 
           <Box>
-            <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1rem", mb: 0.8 }}>Email / CPF:</Typography>
+            <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1rem", mb: 0.8 }}>Email:</Typography>
             <TextField fullWidth variant="outlined" size="small" value={credential} onChange={(e) => setCredential(e.target.value)} disabled={loading} autoComplete="username" sx={{ bgcolor: "rgba(255,255,255,0.4)", borderRadius: "8px", "& .MuiOutlinedInput-root": { borderRadius: "8px", "& fieldset": { border: "none" } }, input: { color: "#1a3d0a" } }} />
           </Box>
 
