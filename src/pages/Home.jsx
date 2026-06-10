@@ -301,7 +301,6 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
   };
 
   const secaoTitulo   = useReveal();
-  const secaoTexto    = useReveal("d2");
   const pitchRef      = useReveal();
   const pitchTextRef  = useReveal("d2");
   const produtoTitulo = useReveal();
