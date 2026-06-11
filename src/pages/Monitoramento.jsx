@@ -8,25 +8,22 @@ import DeleteIcon              from '@mui/icons-material/Delete';
 import FavoriteIcon            from '@mui/icons-material/Favorite';
 import ThermostatIcon          from '@mui/icons-material/Thermostat';
 import DirectionsRunIcon       from '@mui/icons-material/DirectionsRun';
-import BatteryChargingFullIcon from '@mui/icons-material/BatteryChargingFull';
 import WifiIcon                from '@mui/icons-material/Wifi';
 import WifiOffIcon             from '@mui/icons-material/WifiOff';
-import LightbulbCircleIcon     from '@mui/icons-material/LightbulbCircle';
 import WarningAmberIcon        from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon         from '@mui/icons-material/CheckCircle';
 import ReportProblemIcon       from '@mui/icons-material/ReportProblem';
 
 import api               from '../utils/api';
 import { useAuth }       from '../hooks/useAuth';
-import { validarNome, validarCPF, validarEmail, coletarErros } from '../utils/validators';
+import { validarNome, validarCPF, coletarErros } from '../utils/validators';
 import { mascararCPF }   from '../utils/masks';
 
 // ─── Helpers Visuais ──────────────────────────────────────────────────────────
 const lerTelemetria = (telemetria, pulseiraSerial) => telemetria[pulseiraSerial] || {};
-const corMovimento  = (status) => status === "QUEDA!" ? '#e74c3c' : '#2ecc71';
+// const corMovimento  = (status) => status === "QUEDA!" ? '#e74c3c' : '#2ecc71';
 const corBpm        = (bpm)    => (!bpm  ? '#95a5a6' : (bpm  < 60 || bpm  > 100  ? '#e67e22' : '#2ecc71'));
 const corTemp       = (temp)   => (!temp ? '#95a5a6' : (temp >= 37.8 ? '#e74c3c' : (temp < 35.5 ? '#3498db' : '#2ecc71')));
-const corBateria    = (nivel)  => (!nivel ? '#95a5a6' : (nivel <= 20 ? '#e74c3c' : (nivel <= 50 ? '#f39c12' : '#2ecc71')));
 const estaAoVivo    = (ultimaAtualizacao) => ultimaAtualizacao && (Date.now() - ultimaAtualizacao) < 15000;
 
 export default function Monitoramento() {
@@ -117,12 +114,12 @@ export default function Monitoramento() {
     return { total: idososFiltrados.length, estaveis, atencao, critico, offline };
   }, [idososFiltrados, telemetria]);
 
-  const handleTestarPulseira = async (idosoNome, serial) => {
-    try {
-      await api.post(`/api/telemetria/comando-led/${serial}`);
-      alert(`Sinal enviado para pulseira de ${idosoNome}!`);
-    } catch (err) { alert("Erro de conexão com o hardware."); }
-  };
+  // const handleTestarPulseira = async (idosoNome, serial) => {
+  //   try {
+  //     await api.post(`/api/telemetria/comando-led/${serial}`);
+  //     alert(`Sinal enviado para pulseira de ${idosoNome}!`);
+  //   } catch (err) { alert("Erro de conexão com o hardware."); }
+  // };
 
   const handleDelete = async (id, nome) => {
     if (!window.confirm(`ATENÇÃO: Deseja inativar o idoso ${nome}?`)) return;

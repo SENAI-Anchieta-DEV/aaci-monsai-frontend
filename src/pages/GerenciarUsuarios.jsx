@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, IconButton, Tooltip,
-  Alert, CircularProgress, Dialog, DialogTitle, DialogContent,
+  Alert, CircularProgress, Dialog, DialogContent,
   DialogActions, Button, TextField, Chip, useMediaQuery, useTheme,
   Stack, Card, CardContent, Divider
 } from '@mui/material';
@@ -206,10 +206,10 @@ export default function GerenciarUsuarios({ asiloId }) {
   const idososJaVinculados = usuarioSelecionado?.idosos || [];
 
   // ─── Estilos compartilhados para os modais ────────────────────────────────
-  const modalHeaderSx = (cor = '#1a3d0a') => ({
-    bgcolor: cor, color: '#fff', py: 2, px: 3,
-    '& .MuiDialogTitle-root': { p: 0 },
-  });
+  // const modalHeaderSx = (cor = '#1a3d0a') => ({
+  //   bgcolor: cor, color: '#fff', py: 2, px: 3,
+  //   '& .MuiDialogTitle-root': { p: 0 },
+  // });
 
   const modalBtnConfirmarSx = (cor = '#2a5c14') => ({
     bgcolor: cor, borderRadius: 2, fontWeight: 700,

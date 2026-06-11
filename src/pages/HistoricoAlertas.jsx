@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Tabs, Tab, Card, CardContent,
-  Chip, Button, Divider, Paper
+  Chip, Button, Paper
 } from '@mui/material';
 import WarningAmberIcon        from '@mui/icons-material/WarningAmber';
 import CheckCircleOutlineIcon  from '@mui/icons-material/CheckCircleOutline';
