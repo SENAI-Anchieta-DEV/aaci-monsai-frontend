@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Box, Typography, Paper, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, IconButton, Tooltip, 
-  Alert, CircularProgress, Dialog, DialogTitle, DialogContent, 
-  DialogActions, Button, TextField, Chip, useMediaQuery, useTheme, 
+import {
+  Box, Typography, Paper, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, IconButton, Tooltip,
+  Alert, CircularProgress, Dialog, DialogTitle, DialogContent,
+  DialogActions, Button, TextField, Chip, useMediaQuery, useTheme,
   Stack, Card, CardContent, Divider
 } from '@mui/material';
 import DeleteIcon  from '@mui/icons-material/Delete';
 import VpnKeyIcon  from '@mui/icons-material/VpnKey';
+import GroupIcon   from '@mui/icons-material/Group';
+import LinkIcon    from '@mui/icons-material/Link';
+import LinkOffIcon from '@mui/icons-material/LinkOff';
 import api         from '../utils/api';
 import { useToast } from '../components/ToastContext';
 
@@ -15,40 +18,58 @@ import { useToast } from '../components/ToastContext';
 const resolverIdUsuario = (usuario) => usuario.id || usuario.usuarioId;
 const ehFamiliar = (tipo) => tipo === 'FAMILIAR' || tipo === 'ROLE_FAMILIAR';
 
-// ─── Sub-componente: Card mobile de usuário ───────────────────────────────────
+// ─── Badge de cargo ───────────────────────────────────────────────────────────
+const CargoBadge = ({ tipo }) => (
+  <Chip
+    label={tipo}
+    size="small"
+    sx={{ bgcolor: '#AED696', color: '#1a3d0a', fontWeight: 700, fontSize: '0.72rem', height: 22 }}
+  />
+);
+
+// ─── Card mobile de usuário ───────────────────────────────────────────────────
 const UsuarioCard = ({ usuario, onAlterarSenha, onInativar, onVincular, onDesvincular, idLogado }) => {
   const ehVoce = resolverIdUsuario(usuario) === idLogado;
 
   return (
-    <Card component="article" variant="outlined" sx={{ mb: 2, borderRadius: 3 }}>
-      <CardContent sx={{ pb: '12px !important' }}>
+    <Card component="article" variant="outlined" sx={{
+      mb: 2, borderRadius: 4,
+      border: '1px solid rgba(42,92,20,0.12)',
+      boxShadow: '0 4px 16px rgba(42,92,20,0.05)',
+      transition: '0.25s',
+      '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 24px rgba(42,92,20,0.10)' },
+    }}>
+      {/* Barra de topo igual ao card de monitoramento */}
+      <Box sx={{ height: 4, bgcolor: '#4fa825', borderRadius: '4px 4px 0 0' }} />
+      <CardContent sx={{ p: '16px !important' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box>
-            <Typography fontWeight="bold" color="#1a3d0a">
-              {usuario.nome} {ehVoce && <Chip label="Você" size="small" sx={{ ml: 0.5, bgcolor: '#e8f5e9', color: '#2d5a27', fontSize: '0.7rem' }} />}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">{usuario.email}</Typography>
-            <Chip
-              label={usuario.tipo || usuario.tipoUsuario}
-              size="small"
-              sx={{ mt: 1, bgcolor: '#AED696', color: '#1a3d0a', fontWeight: 'bold', fontSize: '0.75rem' }}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
+              <Typography fontWeight={800} sx={{ color: '#1a3d0a' }}>{usuario.nome}</Typography>
+              {ehVoce && (
+                <Chip label="Você" size="small"
+                  sx={{ bgcolor: '#e8f5e9', color: '#2d5a27', fontSize: '0.68rem', height: 18, fontWeight: 700 }} />
+              )}
+            </Box>
+            <Typography variant="body2" sx={{ color: '#7f8c8d', mb: 1 }}>{usuario.email}</Typography>
+            <CargoBadge tipo={usuario.tipo || usuario.tipoUsuario} />
           </Box>
-          <Stack direction="row" alignItems="center">
-            <Tooltip title="Alterar Senha">
-              <IconButton onClick={() => onAlterarSenha(usuario)} sx={{ color: '#2d5a27' }} aria-label="Alterar senha">
-                <VpnKeyIcon />
+
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Tooltip title="Alterar Senha" arrow>
+              <IconButton onClick={() => onAlterarSenha(usuario)} size="small"
+                sx={{ color: '#2a5c14', bgcolor: 'rgba(42,92,20,0.06)', '&:hover': { bgcolor: 'rgba(42,92,20,0.14)' } }}>
+                <VpnKeyIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-            <Tooltip title={ehVoce ? "Você não pode remover a si mesmo" : "Remover Acesso"}>
+            <Tooltip title={ehVoce ? "Você não pode remover a si mesmo" : "Remover Acesso"} arrow>
               <span>
                 <IconButton
                   onClick={() => onInativar(resolverIdUsuario(usuario), usuario.nome)}
-                  disabled={ehVoce}
-                  sx={{ color: ehVoce ? '#ccc' : '#d32f2f' }}
-                  aria-label="Remover acesso"
+                  disabled={ehVoce} size="small"
+                  sx={{ color: ehVoce ? '#ccc' : '#e74c3c', bgcolor: ehVoce ? 'transparent' : 'rgba(231,76,60,0.06)', '&:hover': { bgcolor: 'rgba(231,76,60,0.14)' } }}
                 >
-                  <DeleteIcon />
+                  <DeleteIcon fontSize="small" />
                 </IconButton>
               </span>
             </Tooltip>
@@ -57,12 +78,16 @@ const UsuarioCard = ({ usuario, onAlterarSenha, onInativar, onVincular, onDesvin
 
         {ehFamiliar(usuario.tipo) && (
           <>
-            <Divider sx={{ my: 1.5 }} />
+            <Divider sx={{ my: 1.5, borderColor: 'rgba(42,92,20,0.08)' }} />
             <Stack direction="row" gap={1}>
-              <Button size="small" variant="outlined" fullWidth onClick={() => onVincular(usuario)}>
+              <Button size="small" variant="outlined" fullWidth startIcon={<LinkIcon />}
+                onClick={() => onVincular(usuario)}
+                sx={{ borderColor: 'rgba(42,92,20,0.3)', color: '#2a5c14', borderRadius: 2, fontWeight: 700, '&:hover': { borderColor: '#2a5c14', bgcolor: 'rgba(42,92,20,0.04)' } }}>
                 Vincular
               </Button>
-              <Button size="small" variant="outlined" color="error" fullWidth onClick={() => onDesvincular(usuario)}>
+              <Button size="small" variant="outlined" fullWidth startIcon={<LinkOffIcon />}
+                onClick={() => onDesvincular(usuario)}
+                sx={{ borderColor: 'rgba(231,76,60,0.3)', color: '#e74c3c', borderRadius: 2, fontWeight: 700, '&:hover': { borderColor: '#e74c3c', bgcolor: 'rgba(231,76,60,0.04)' } }}>
                 Desvincular
               </Button>
             </Stack>
@@ -75,14 +100,14 @@ const UsuarioCard = ({ usuario, onAlterarSenha, onInativar, onVincular, onDesvin
 
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export default function GerenciarUsuarios({ asiloId }) {
-  const [usuarios, setUsuarios]               = useState([]);
-  const [listaIdosos, setListaIdosos]         = useState([]);
-  const [status, setStatus]                   = useState({ loading: true, error: null, success: null });
+  const [usuarios,           setUsuarios]           = useState([]);
+  const [listaIdosos,        setListaIdosos]        = useState([]);
+  const [status,             setStatus]             = useState({ loading: true, error: null, success: null });
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
-  const [idosoSelecionado, setIdosoSelecionado]     = useState('');
-  const [novaSenha, setNovaSenha]             = useState('');
-  const [modalSenhaAberto, setModalSenhaAberto]           = useState(false);
-  const [modalVinculoAberto, setModalVinculoAberto]       = useState(false);
+  const [idosoSelecionado,   setIdosoSelecionado]   = useState('');
+  const [novaSenha,          setNovaSenha]          = useState('');
+  const [modalSenhaAberto,      setModalSenhaAberto]      = useState(false);
+  const [modalVinculoAberto,    setModalVinculoAberto]    = useState(false);
   const [modalDesvinculoAberto, setModalDesvinculoAberto] = useState(false);
 
   const theme    = useTheme();
@@ -110,30 +135,19 @@ export default function GerenciarUsuarios({ asiloId }) {
   const carregarIdosos = async () => {
     try {
       const res = await api.get('/idosos');
-      setListaIdosos(res.data.filter(i => i.ativo)); // Mantém apenas idosos ativos na listagem de vínculo
-    } catch (err) {
-      console.error("Erro ao carregar idosos", err);
-    }
+      setListaIdosos(res.data.filter(i => i.ativo));
+    } catch (err) { console.error("Erro ao carregar idosos", err); }
   };
 
-  useEffect(() => {
-    carregarUsuarios();
-    carregarIdosos();
-  }, [carregarUsuarios]);
+  useEffect(() => { carregarUsuarios(); carregarIdosos(); }, [carregarUsuarios]);
 
   // ─── Ações ───────────────────────────────────────────────────────────────
   const handleInativar = async (id, nome) => {
     if (id === idLogado) {
-      showToast({
-        type: "error",
-        title: "Ação não permitida",
-        message: "Você não pode remover o seu próprio acesso.",
-      });
+      showToast({ type: "error", title: "Ação não permitida", message: "Você não pode remover o seu próprio acesso." });
       return;
     }
-
     if (!window.confirm(`Tem certeza que deseja remover o acesso de ${nome}?`)) return;
-
     try {
       await api.delete(`/usuarios/${id}`);
       setUsuarios((prev) => prev.filter((u) => resolverIdUsuario(u) !== id));
@@ -144,23 +158,17 @@ export default function GerenciarUsuarios({ asiloId }) {
     }
   };
 
-  const abrirModalSenha = (usuario) => {
-    setUsuarioSelecionado(usuario);
-    setNovaSenha('');
-    setModalSenhaAberto(true);
-  };
+  const abrirModalSenha = (usuario) => { setUsuarioSelecionado(usuario); setNovaSenha(''); setModalSenhaAberto(true); };
 
   const handleSalvarSenha = async () => {
     if (novaSenha.length < 6) {
       showToast({ type: "error", title: "Senha fraca", message: "A nova senha deve ter pelo menos 6 caracteres." });
       return;
     }
-    const idAlvo = resolverIdUsuario(usuarioSelecionado);
     try {
-      // ✅ Payload corrigido para corresponder ao DTO do Spring Boot
-      await api.patch(`/usuarios/${idAlvo}/senha`, { senha: novaSenha });
+      await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, { senha: novaSenha });
       setModalSenhaAberto(false);
-      showToast({ type: "success", title: "Senha updated!", message: `Senha de ${usuarioSelecionado.nome} alterada com sucesso.` });
+      showToast({ type: "success", title: "Senha atualizada!", message: `Senha de ${usuarioSelecionado.nome} alterada com sucesso.` });
     } catch (err) {
       const msgErro = err.response?.data?.detail || err.response?.data?.message || "Erro interno";
       showToast({ type: "error", title: "Erro ao atualizar senha", message: msgErro });
@@ -168,12 +176,11 @@ export default function GerenciarUsuarios({ asiloId }) {
   };
 
   const handleVincular = async () => {
-    const idUsuario = resolverIdUsuario(usuarioSelecionado);
     try {
-      await api.post(`/usuarios/${idUsuario}/idosos/${idosoSelecionado}`, {});
+      await api.post(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/idosos/${idosoSelecionado}`, {});
       showToast({ type: "success", title: "Vinculado!", message: "Idoso vinculado com sucesso." });
       setModalVinculoAberto(false);
-      setIdosoSelecionado(''); // Limpa seleção residual
+      setIdosoSelecionado('');
       carregarUsuarios();
     } catch (err) {
       showToast({ type: "error", title: "Erro ao vincular", message: err.response?.data?.detail || "Erro desconhecido" });
@@ -186,34 +193,63 @@ export default function GerenciarUsuarios({ asiloId }) {
       await api.delete(`/usuarios/${idUsuario}/idosos/${idIdoso}`);
       showToast({ type: "success", title: "Vínculo removido!", message: "O vínculo foi desfeito com sucesso." });
       setModalDesvinculoAberto(false);
-      setIdosoSelecionado(''); // Limpa seleção residual
+      setIdosoSelecionado('');
       carregarUsuarios();
     } catch (err) {
       showToast({ type: "error", title: "Erro ao desvincular", message: err.response?.data?.message || "Erro interno" });
     }
   };
 
-  const abrirModalVinculo    = (usuario) => { setUsuarioSelecionado(usuario); setIdosoSelecionado(''); setModalVinculoAberto(true); };
-  const abrirModalDesvinculo = (usuario) => { setUsuarioSelecionado(usuario); setIdosoSelecionado(''); setModalDesvinculoAberto(true); };
+  const abrirModalVinculo    = (u) => { setUsuarioSelecionado(u); setIdosoSelecionado(''); setModalVinculoAberto(true); };
+  const abrirModalDesvinculo = (u) => { setUsuarioSelecionado(u); setIdosoSelecionado(''); setModalDesvinculoAberto(true); };
 
   const idososJaVinculados = usuarioSelecionado?.idosos || [];
 
-  return (
-    <Box component="section" sx={{ maxWidth: 1000, mx: 'auto', mt: 2, px: { xs: 1, sm: 2 } }}>
-      <Typography component="h2" variant="h5" sx={{ mb: 3, color: '#1a3d0a', fontWeight: 'bold' }}>
-        Gerenciar Colaboradores
-      </Typography>
+  // ─── Estilos compartilhados para os modais ────────────────────────────────
+  const modalHeaderSx = (cor = '#1a3d0a') => ({
+    bgcolor: cor, color: '#fff', py: 2, px: 3,
+    '& .MuiDialogTitle-root': { p: 0 },
+  });
 
-      {status.error && <Alert severity="error" sx={{ mb: 2 }}>{status.error}</Alert>}
+  const modalBtnConfirmarSx = (cor = '#2a5c14') => ({
+    bgcolor: cor, borderRadius: 2, fontWeight: 700,
+    boxShadow: 'none',
+    '&:hover': { bgcolor: cor === '#2a5c14' ? '#1a3d0a' : '#c0392b', boxShadow: 'none' },
+  });
+
+  return (
+    <Box component="section" sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+
+      {/* Cabeçalho */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography component="h2" variant="h4" sx={{ color: '#1a3d0a', fontWeight: 800, letterSpacing: '-0.5px' }}>
+            Gerenciar Colaboradores
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mt: 1 }}>
+            <Typography variant="body2" color="text.secondary" fontWeight={500}>Controle de Acesso</Typography>
+            <Chip
+              size="small"
+              icon={<GroupIcon sx={{ fontSize: '14px !important' }} />}
+              label={`${usuarios.length} ativo${usuarios.length !== 1 ? 's' : ''}`}
+              color="success"
+              sx={{ fontWeight: 600, height: 24, fontSize: '0.7rem' }}
+            />
+          </Box>
+        </Box>
+      </Box>
+
+      {status.error && <Alert severity="error" sx={{ borderRadius: 3 }}>{status.error}</Alert>}
 
       {status.loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}>
-          <CircularProgress sx={{ color: '#2d5a27' }} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+          <CircularProgress sx={{ color: '#2a5c14' }} />
         </Box>
       ) : isMobile ? (
+        /* ── Vista Mobile ─────────────────────────────────────────────── */
         <Box>
           {usuarios.length === 0 ? (
-            <Typography align="center" color="text.secondary" sx={{ py: 3 }}>
+            <Typography align="center" color="text.secondary" sx={{ py: 4 }}>
               Nenhum colaborador ativo encontrado.
             </Typography>
           ) : (
@@ -231,14 +267,20 @@ export default function GerenciarUsuarios({ asiloId }) {
           )}
         </Box>
       ) : (
-        <Paper elevation={0} sx={{ borderRadius: 4, border: '1px solid #e0e0e0', overflow: 'hidden' }}>
+        /* ── Vista Desktop ────────────────────────────────────────────── */
+        <Paper elevation={0} sx={{
+          borderRadius: 4,
+          border: '1px solid rgba(42,92,20,0.1)',
+          overflow: 'hidden',
+          boxShadow: '0 8px 24px rgba(42,92,20,0.06)',
+        }}>
           <TableContainer>
             <Table aria-label="Lista de colaboradores">
-              <TableHead sx={{ bgcolor: '#f4f7f1' }}>
-                <TableRow>
+              <TableHead>
+                <TableRow sx={{ bgcolor: '#1a3d0a' }}>
                   {['Nome', 'E-mail', 'Cargo', 'Ações'].map((col, i) => (
                     <TableCell key={col} align={i === 3 ? 'center' : 'left'}
-                      sx={{ fontWeight: 'bold', color: '#1a3d0a' }}>
+                      sx={{ fontWeight: 800, color: '#fff', fontSize: '0.82rem', letterSpacing: '0.5px', py: 2 }}>
                       {col}
                     </TableCell>
                   ))}
@@ -247,7 +289,7 @@ export default function GerenciarUsuarios({ asiloId }) {
               <TableBody>
                 {usuarios.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                    <TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.secondary' }}>
                       Nenhum colaborador ativo encontrado.
                     </TableCell>
                   </TableRow>
@@ -255,48 +297,67 @@ export default function GerenciarUsuarios({ asiloId }) {
                   usuarios.map((usuario) => {
                     const ehVoce = resolverIdUsuario(usuario) === idLogado;
                     return (
-                      <TableRow key={resolverIdUsuario(usuario)} hover>
+                      <TableRow key={resolverIdUsuario(usuario)} hover
+                        sx={{ '&:hover': { bgcolor: 'rgba(42,92,20,0.03)' }, transition: '0.15s' }}>
+
                         <TableCell>
-                          {usuario.nome}{' '}
-                          {ehVoce && (
-                            <Chip label="Você" size="small"
-                              sx={{ ml: 0.5, bgcolor: '#e8f5e9', color: '#2d5a27', fontSize: '0.7rem' }} />
-                          )}
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography fontWeight={700} sx={{ color: '#1a3d0a', fontSize: '0.9rem' }}>
+                              {usuario.nome}
+                            </Typography>
+                            {ehVoce && (
+                              <Chip label="Você" size="small"
+                                sx={{ bgcolor: '#e8f5e9', color: '#2d5a27', fontSize: '0.68rem', height: 18, fontWeight: 700 }} />
+                            )}
+                          </Box>
                         </TableCell>
-                        <TableCell>{usuario.email}</TableCell>
+
                         <TableCell>
-                          <Chip label={usuario.tipo || usuario.tipoUsuario} size="small"
-                            sx={{ bgcolor: '#AED696', color: '#1a3d0a', fontWeight: 'bold', fontSize: '0.75rem' }} />
+                          <Typography variant="body2" sx={{ color: '#7f8c8d' }}>{usuario.email}</Typography>
                         </TableCell>
+
+                        <TableCell>
+                          <CargoBadge tipo={usuario.tipo || usuario.tipoUsuario} />
+                        </TableCell>
+
                         <TableCell align="center">
-                          <Tooltip title="Alterar Senha">
-                            <IconButton onClick={() => abrirModalSenha(usuario)} sx={{ color: '#2d5a27' }}>
-                              <VpnKeyIcon />
-                            </IconButton>
-                          </Tooltip>
-
-                          {ehFamiliar(usuario.tipo) && (
-                            <Box sx={{ display: 'inline-flex', gap: 1, mx: 1 }}>
-                              <Button size="small" variant="outlined" onClick={() => abrirModalVinculo(usuario)}>
-                                Vincular
-                              </Button>
-                              <Button size="small" variant="outlined" color="error" onClick={() => abrirModalDesvinculo(usuario)}>
-                                Desvincular
-                              </Button>
-                            </Box>
-                          )}
-
-                          <Tooltip title={ehVoce ? "Você não pode remover a si mesmo" : "Remover Acesso"}>
-                            <span>
-                              <IconButton
-                                onClick={() => handleInativar(resolverIdUsuario(usuario), usuario.nome)}
-                                disabled={ehVoce}
-                                sx={{ color: ehVoce ? '#ccc' : '#d32f2f' }}
-                              >
-                                <DeleteIcon />
+                          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+                            <Tooltip title="Alterar Senha" arrow>
+                              <IconButton onClick={() => abrirModalSenha(usuario)} size="small"
+                                sx={{ color: '#2a5c14', bgcolor: 'rgba(42,92,20,0.06)', '&:hover': { bgcolor: 'rgba(42,92,20,0.14)' } }}>
+                                <VpnKeyIcon fontSize="small" />
                               </IconButton>
-                            </span>
-                          </Tooltip>
+                            </Tooltip>
+
+                            {ehFamiliar(usuario.tipo) && (
+                              <>
+                                <Tooltip title="Vincular idoso" arrow>
+                                  <IconButton onClick={() => abrirModalVinculo(usuario)} size="small"
+                                    sx={{ color: '#2a5c14', bgcolor: 'rgba(42,92,20,0.06)', '&:hover': { bgcolor: 'rgba(42,92,20,0.14)' } }}>
+                                    <LinkIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Desvincular idoso" arrow>
+                                  <IconButton onClick={() => abrirModalDesvinculo(usuario)} size="small"
+                                    sx={{ color: '#e67e22', bgcolor: 'rgba(230,126,34,0.06)', '&:hover': { bgcolor: 'rgba(230,126,34,0.14)' } }}>
+                                    <LinkOffIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </>
+                            )}
+
+                            <Tooltip title={ehVoce ? "Você não pode remover a si mesmo" : "Remover Acesso"} arrow>
+                              <span>
+                                <IconButton
+                                  onClick={() => handleInativar(resolverIdUsuario(usuario), usuario.nome)}
+                                  disabled={ehVoce} size="small"
+                                  sx={{ color: ehVoce ? '#ccc' : '#e74c3c', bgcolor: ehVoce ? 'transparent' : 'rgba(231,76,60,0.06)', '&:hover': { bgcolor: 'rgba(231,76,60,0.14)' } }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Box>
                         </TableCell>
                       </TableRow>
                     );
@@ -308,66 +369,107 @@ export default function GerenciarUsuarios({ asiloId }) {
         </Paper>
       )}
 
-      {/* MODAL DE SENHA */}
-      <Dialog open={modalSenhaAberto} onClose={() => setModalSenhaAberto(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ color: '#1a3d0a', fontWeight: 'bold' }}>Redefinir Senha</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Nova senha para <strong>{usuarioSelecionado?.nome}</strong>.
+      {/* ── Modal: Alterar Senha ────────────────────────────────────────── */}
+      <Dialog open={modalSenhaAberto} onClose={() => setModalSenhaAberto(false)} maxWidth="xs" fullWidth
+        PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}>
+        <Box sx={{ bgcolor: '#1a3d0a', px: 3, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <VpnKeyIcon sx={{ color: '#7ec44f', fontSize: 20 }} />
+          <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', fontSize: '1rem' }}>
+            Redefinir Senha
           </Typography>
-          <TextField autoFocus margin="dense" label="Nova Senha" type="password" fullWidth variant="outlined"
+        </Box>
+        <DialogContent sx={{ pt: 3 }}>
+          <Typography variant="body2" sx={{ mb: 2.5, color: '#7f8c8d' }}>
+            Nova senha para <strong style={{ color: '#1a3d0a' }}>{usuarioSelecionado?.nome}</strong>.
+          </Typography>
+          <TextField
+            autoFocus fullWidth size="small" label="Nova Senha" type="password"
             value={novaSenha} onChange={(e) => setNovaSenha(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSalvarSenha()}
+            sx={{ '& fieldset': { borderRadius: 2 } }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setModalSenhaAberto(false)}>Cancelar</Button>
-          <Button onClick={handleSalvarSenha} variant="contained" sx={{ bgcolor: '#2d5a27' }}>Salvar</Button>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button onClick={() => setModalSenhaAberto(false)}
+            sx={{ borderRadius: 2, color: '#555', fontWeight: 600 }}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSalvarSenha} variant="contained" sx={modalBtnConfirmarSx()}>
+            Salvar
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* MODAL VINCULAR IDOSO */}
-      <Dialog open={modalVinculoAberto} onClose={() => setModalVinculoAberto(false)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 'bold' }}>Vincular Idoso</DialogTitle>
-        <DialogContent>
-          <TextField select fullWidth label="Selecione o Idoso"
+      {/* ── Modal: Vincular Idoso ───────────────────────────────────────── */}
+      <Dialog open={modalVinculoAberto} onClose={() => setModalVinculoAberto(false)} fullWidth maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}>
+        <Box sx={{ bgcolor: '#1a3d0a', px: 3, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <LinkIcon sx={{ color: '#7ec44f', fontSize: 20 }} />
+          <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', fontSize: '1rem' }}>
+            Vincular Idoso
+          </Typography>
+        </Box>
+        <DialogContent sx={{ pt: 3 }}>
+          <Typography variant="body2" sx={{ mb: 2.5, color: '#7f8c8d' }}>
+            Selecione um idoso para vincular a <strong style={{ color: '#1a3d0a' }}>{usuarioSelecionado?.nome}</strong>.
+          </Typography>
+          <TextField select fullWidth size="small" label="Selecione o Idoso"
             value={idosoSelecionado} onChange={(e) => setIdosoSelecionado(e.target.value)}
-            SelectProps={{ native: true }} margin="dense">
+            SelectProps={{ native: true }}
+            sx={{ '& fieldset': { borderRadius: 2 } }}>
             <option value=""></option>
             {listaIdosos.map((i) => <option key={i.id} value={i.id}>{i.nome}</option>)}
           </TextField>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalVinculoAberto(false)}>Cancelar</Button>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button onClick={() => setModalVinculoAberto(false)}
+            sx={{ borderRadius: 2, color: '#555', fontWeight: 600 }}>
+            Cancelar
+          </Button>
           <Button onClick={handleVincular} variant="contained" disabled={!idosoSelecionado}
-            sx={{ bgcolor: '#2d5a27' }}>
+            sx={modalBtnConfirmarSx()}>
             Confirmar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* MODAL DESVINCULAR IDOSO */}
-      <Dialog open={modalDesvinculoAberto} onClose={() => setModalDesvinculoAberto(false)} fullWidth maxWidth="xs">
-        <DialogTitle sx={{ fontWeight: 'bold', color: '#d32f2f' }}>Remover Vínculo</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Remover idoso de: <strong>{usuarioSelecionado?.nome}</strong>
+      {/* ── Modal: Desvincular Idoso ────────────────────────────────────── */}
+      <Dialog open={modalDesvinculoAberto} onClose={() => setModalDesvinculoAberto(false)} fullWidth maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: 4, overflow: 'hidden' } }}>
+        <Box sx={{ bgcolor: '#c0392b', px: 3, py: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <LinkOffIcon sx={{ color: '#fff', fontSize: 20 }} />
+          <Typography variant="h6" fontWeight={800} sx={{ color: '#fff', fontSize: '1rem' }}>
+            Remover Vínculo
           </Typography>
-          <TextField select fullWidth label="Idoso Vinculado"
+        </Box>
+        <DialogContent sx={{ pt: 3 }}>
+          <Typography variant="body2" sx={{ mb: 2.5, color: '#7f8c8d' }}>
+            Selecione o idoso a desvincular de <strong style={{ color: '#1a3d0a' }}>{usuarioSelecionado?.nome}</strong>.
+          </Typography>
+          <TextField select fullWidth size="small" label="Idoso Vinculado"
             value={idosoSelecionado} onChange={(e) => setIdosoSelecionado(e.target.value)}
-            SelectProps={{ native: true }} margin="dense">
+            SelectProps={{ native: true }}
+            sx={{ '& fieldset': { borderRadius: 2 } }}>
             <option value=""></option>
             {idososJaVinculados.map((i) => <option key={i.id} value={i.id}>{i.nome}</option>)}
           </TextField>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalDesvinculoAberto(false)}>Cancelar</Button>
+        <Divider />
+        <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
+          <Button onClick={() => setModalDesvinculoAberto(false)}
+            sx={{ borderRadius: 2, color: '#555', fontWeight: 600 }}>
+            Cancelar
+          </Button>
           <Button variant="contained" color="error" disabled={!idosoSelecionado}
-            onClick={() => handleDesvincular(resolverIdUsuario(usuarioSelecionado), idosoSelecionado)}>
+            onClick={() => handleDesvincular(resolverIdUsuario(usuarioSelecionado), idosoSelecionado)}
+            sx={{ borderRadius: 2, fontWeight: 700, boxShadow: 'none' }}>
             Desvincular
           </Button>
         </DialogActions>
       </Dialog>
+
     </Box>
   );
 }

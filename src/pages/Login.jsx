@@ -2,7 +2,19 @@ import { useState } from "react";
 import { useToast } from "../components/ToastContext";
 import api from "../utils/api";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Box, Button, TextField, Typography, Paper } from "@mui/material";
+import { 
+  Box, Button, TextField, Typography, Paper, InputAdornment, IconButton 
+} from "@mui/material";
+
+// Importando os ícones para dar um ar profissional aos inputs
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
+// Importando a logo para reforçar a marca na tela de login
+import logoCompleta from "../assets/logos/Logo_completa.png";
 
 const theme = createTheme({
   palette: {
@@ -11,10 +23,33 @@ const theme = createTheme({
   },
   typography: {
     fontFamily: "'Inter', 'Montserrat', sans-serif",
-    button: { fontFamily: "'Montserrat', sans-serif", fontWeight: 600, textTransform: "none" },
+    button: { fontFamily: "'Montserrat', sans-serif", fontWeight: 700, textTransform: "none", letterSpacing: "0.5px" },
   },
   components: {
-    MuiButton: { styleOverrides: { root: { borderRadius: 28, boxShadow: "none" } } },
+    MuiButton: { 
+      styleOverrides: { 
+        root: { 
+          borderRadius: 12, 
+          transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+        } 
+      } 
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "12px",
+            backgroundColor: "rgba(255, 255, 255, 0.6)",
+            backdropFilter: "blur(8px)",
+            transition: "all 0.2s ease-in-out",
+            "& fieldset": { borderColor: "rgba(42, 92, 20, 0.2)" },
+            "&:hover fieldset": { borderColor: "rgba(42, 92, 20, 0.5)" },
+            "&.Mui-focused fieldset": { borderColor: "#4fa825", borderWidth: "2px" },
+            "&.Mui-focused": { backgroundColor: "#ffffff", boxShadow: "0 4px 12px rgba(79, 168, 37, 0.1)" }
+          }
+        }
+      }
+    }
   },
 });
 
@@ -23,22 +58,25 @@ function LoadingBar() {
     <Box sx={{
       position: "fixed", inset: 0, zIndex: 9999,
       display: "flex", alignItems: "center", justifyContent: "center",
-      bgcolor: "rgba(0,0,0,0.35)", backdropFilter: "blur(2px)",
+      bgcolor: "rgba(10, 26, 5, 0.4)", backdropFilter: "blur(6px)",
+      animation: "fadeIn 0.3s ease-out"
     }}>
-      <Box sx={{ bgcolor: "#e8e8e8", borderRadius: "16px", px: 3, py: 2.5, width: 300, boxShadow: "0 8px 32px rgba(0,0,0,0.25)" }}>
-        <Typography sx={{ fontFamily: "'Inter', sans-serif", fontWeight: 700, mb: 1.2, color: "#1a1a1a" }}>
-          Carregando...
+      <Box sx={{ 
+        bgcolor: "#ffffff", borderRadius: "20px", px: 4, py: 3.5, width: 320, 
+        boxShadow: "0 24px 48px rgba(0,0,0,0.3)", textAlign: "center" 
+      }}>
+        <Typography sx={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, mb: 2, color: "#1a3d0a", fontSize: "1.1rem" }}>
+          Autenticando...
         </Typography>
-        <Box sx={{ width: "100%", height: 18, bgcolor: "#d0d0d0", borderRadius: "999px", overflow: "hidden", position: "relative" }}>
+        <Box sx={{ width: "100%", height: 6, bgcolor: "#e4f0dc", borderRadius: "999px", overflow: "hidden", position: "relative" }}>
           <Box sx={{
-            position: "absolute", left: 0, top: 0, bottom: 0, width: "100%",
-            background: "linear-gradient(to right, #2a5c14 0%, #4fa825 55%, #d0d0d0 100%)",
+            position: "absolute", left: 0, top: 0, bottom: 0, width: "50%",
+            background: "linear-gradient(to right, #7ec44f 0%, #2a5c14 100%)",
             borderRadius: "999px",
-            animation: "loadingSlide 1.6s ease-in-out infinite",
+            animation: "loadingSlide 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite",
             "@keyframes loadingSlide": {
               "0%":   { transform: "translateX(-100%)" },
-              "50%":  { transform: "translateX(0%)" },
-              "100%": { transform: "translateX(100%)" },
+              "100%": { transform: "translateX(200%)" },
             },
           }} />
         </Box>
@@ -51,11 +89,12 @@ export default function Login({ onLogin, onRecuperar }) {
   const [credential, setCredential] = useState("");
   const [password, setPassword]     = useState("");
   const [loading, setLoading]       = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Novo state para o "olhinho" da senha
   const showToast = useToast();
 
   const handleLogin = async () => {
     if (!credential || !password) {
-      showToast({ type: "error", title: "Campos vazios", message: "Preencha email e senha." });
+      showToast({ type: "error", title: "Campos vazios", message: "Preencha email e senha para continuar." });
       return;
     }
     
@@ -112,25 +151,151 @@ export default function Login({ onLogin, onRecuperar }) {
   return (
     <ThemeProvider theme={theme}>
       {loading && <LoadingBar />}
-      <Box component="div" sx={{ minHeight: "calc(100vh - 64px)", bgcolor: "#c8ddb8", display: "flex", alignItems: "center", justifyContent: "center", p: { xs: 2, md: 3 } }}>
-        <Paper elevation={0} sx={{ background: "linear-gradient(160deg, #a8d58a 0%, #4a8a3a 100%)", borderRadius: "20px", p: { xs: "2rem", sm: "2.5rem 3rem" }, width: "100%", maxWidth: 400, display: "flex", flexDirection: "column", gap: 3, boxShadow: "0 12px 40px rgba(0,0,0,0.2)" }}>
-          <Typography variant="h4" sx={{ color: "#1a3a16", fontWeight: 700, textAlign: "center", mb: 1 }}>Login</Typography>
-
-          <Box>
-            <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1rem", mb: 0.8 }}>Email:</Typography>
-            <TextField fullWidth variant="outlined" size="small" value={credential} onChange={(e) => setCredential(e.target.value)} disabled={loading} autoComplete="username" sx={{ bgcolor: "rgba(255,255,255,0.4)", borderRadius: "8px", "& .MuiOutlinedInput-root": { borderRadius: "8px", "& fieldset": { border: "none" } }, input: { color: "#1a3d0a" } }} />
+      
+      {/* Container Principal com Background Premium */}
+      <Box 
+        component="div" 
+        sx={{ 
+          minHeight: "calc(100vh - 64px)", 
+          // Fundo com mesh gradient usando a sua paleta
+          background: "radial-gradient(circle at 15% 50%, #e4f0dc 0%, #c8ddb8 50%, #a8d58a 100%)", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          p: { xs: 2, md: 3 },
+          position: "relative",
+          overflow: "hidden"
+        }}
+      >
+        {/* Círculo decorativo de fundo (Efeito de luz sutil) */}
+        <Box sx={{ position: "absolute", top: "-10%", right: "-5%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(126,196,79,0.3) 0%, transparent 70%)", filter: "blur(40px)", pointerEvents: "none" }} />
+        
+        {/* Card de Login com Glassmorphism */}
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            background: "rgba(255, 255, 255, 0.85)", 
+            backdropFilter: "blur(16px)",
+            border: "1px solid rgba(255, 255, 255, 0.6)",
+            borderRadius: "24px", 
+            p: { xs: "2.5rem 1.5rem", sm: "3.5rem 3rem" }, 
+            width: "100%", 
+            maxWidth: 440, 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: 3.5, 
+            boxShadow: "0 24px 48px -12px rgba(26, 61, 10, 0.2)",
+            position: "relative",
+            zIndex: 1,
+            animation: "monsai-modalIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+            "@keyframes monsai-modalIn": {
+              from: { opacity: 0, transform: "scale(0.96) translateY(20px)" },
+              to: { opacity: 1, transform: "scale(1) translateY(0)" }
+            }
+          }}
+        >
+          {/* Cabeçalho do Card */}
+          <Box sx={{ textAlign: "center", mb: 1 }}>
+            {/* Logo MONSAI renderizada se existir no path, senão cai pro fallback gracefully */}
+            <Box component="img" src={logoCompleta} alt="MONSAI Logo" sx={{ width: 180, mx: "auto", mb: 3, display: "block", filter: "drop-shadow(0 4px 6px rgba(42,92,20,0.1))" }} onError={(e) => e.target.style.display = 'none'} />
+            
+            <Typography variant="h4" sx={{ color: "#1a3d0a", fontWeight: 800, letterSpacing: "-0.5px" }}>
+              Bem-vindo
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#4a6b3b", fontWeight: 500, mt: 0.5, fontSize: "0.95rem" }}>
+              Acesse o painel de monitoramento
+            </Typography>
           </Box>
 
-          <Box>
-            <Typography sx={{ color: "#1a3a16", fontWeight: 700, fontSize: "1rem", mb: 0.8 }}>Senha:</Typography>
-            <TextField fullWidth variant="outlined" size="small" type="password" value={password} onChange={(e) => setPassword(e.target.value)} disabled={loading} autoComplete="current-password" onKeyDown={(e) => e.key === "Enter" && !loading && handleLogin()} sx={{ bgcolor: "rgba(255,255,255,0.4)", borderRadius: "8px", "& .MuiOutlinedInput-root": { borderRadius: "8px", "& fieldset": { border: "none" } }, input: { color: "#1a3d0a" } }} />
+          {/* Área de Inputs */}
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <Box>
+              <Typography sx={{ color: "#1a3d0a", fontWeight: 700, fontSize: "0.9rem", mb: 1, ml: 0.5 }}>E-mail</Typography>
+              <TextField 
+                fullWidth 
+                placeholder="seu@email.com"
+                variant="outlined" 
+                value={credential} 
+                onChange={(e) => setCredential(e.target.value)} 
+                disabled={loading} 
+                autoComplete="username" 
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlinedIcon sx={{ color: "#4fa825", fontSize: "1.3rem" }} />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
+
+            <Box>
+              <Typography sx={{ color: "#1a3d0a", fontWeight: 700, fontSize: "0.9rem", mb: 1, ml: 0.5 }}>Senha</Typography>
+              <TextField 
+                fullWidth 
+                placeholder="••••••••"
+                variant="outlined" 
+                type={showPassword ? "text" : "password"} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                disabled={loading} 
+                autoComplete="current-password" 
+                onKeyDown={(e) => e.key === "Enter" && !loading && handleLogin()} 
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlinedIcon sx={{ color: "#4fa825", fontSize: "1.3rem" }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" disabled={loading}>
+                        {showPassword ? <VisibilityOff sx={{ color: "#4a6b3b", fontSize: "1.2rem" }} /> : <Visibility sx={{ color: "#4a6b3b", fontSize: "1.2rem" }} />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+            </Box>
           </Box>
 
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-            <Button variant="contained" onClick={handleLogin} disabled={loading} sx={{ bgcolor: "#2d5a27", color: "#fff", borderRadius: "8px", py: 1.2, fontWeight: 700, fontSize: "1rem", width: "100%", boxShadow: "0 4px 14px rgba(45,90,39,0.4)", "&:hover": { bgcolor: "#1e3d1a" } }}>
-              {loading ? "Entrando..." : "Entrar"}
+          {/* Área de Ações */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, mt: 1 }}>
+            <Button 
+              variant="contained" 
+              onClick={handleLogin} 
+              disabled={loading} 
+              endIcon={<ArrowForwardIcon />}
+              sx={{ 
+                bgcolor: "#4fa825", 
+                color: "#fff", 
+                py: 1.4, 
+                fontSize: "1.05rem", 
+                width: "100%", 
+                boxShadow: "0 8px 24px rgba(79,168,37,0.3)", 
+                "&:hover": { 
+                  bgcolor: "#2a5c14",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 12px 32px rgba(42,92,20,0.4)" 
+                } 
+              }}
+            >
+              Entrar no Sistema
             </Button>
-            <Typography onClick={() => !loading && onRecuperar?.()} sx={{ color: "#1a3a16", fontSize: "0.85rem", cursor: "pointer", textDecoration: "underline", opacity: 0.8, "&:hover": { opacity: 1 } }}>Esqueceu sua senha?</Typography>
+            
+            <Typography 
+              onClick={() => !loading && onRecuperar?.()} 
+              sx={{ 
+                color: "#4a6b3b", 
+                fontSize: "0.9rem", 
+                fontWeight: 600,
+                cursor: "pointer", 
+                transition: "all 0.2s",
+                "&:hover": { color: "#1a3d0a", textDecoration: "underline" } 
+              }}
+            >
+              Esqueceu sua senha?
+            </Typography>
           </Box>
         </Paper>
       </Box>
