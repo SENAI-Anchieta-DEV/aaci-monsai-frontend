@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import logo from "../assets/logos/Logo_nome.png";
 import logoCompleta from "../assets/logos/Logo_completa.png";
 import idosoFeliz from "../assets/images/idoso_feliz_2.png";
-import { useToast } from "../components/ToastContext";
 import pulseiraMonsai from "../assets/images/pulseira_monsai.png";
+import equipeImg from "../assets/images/equipeImg.jpeg"; // <-- Imagem da equipe importada
+import { useToast } from "../components/ToastContext";
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import {
@@ -18,8 +19,6 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShieldIcon from "@mui/icons-material/Shield";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import DevicesIcon from "@mui/icons-material/Devices";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import CloseIcon from "@mui/icons-material/Close";
 
 // ─── Tema MONSAI ──────────────────────────────────────────────────────────────
 const theme = createTheme({
@@ -86,11 +85,6 @@ const GLOBAL_CSS = `
     animation: monsai-ecgDraw 2.8s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
   }
 
-  /*
-    Reveal — aplicado num wrapper <div> puro, NUNCA no elemento que
-    precisa de position:absolute, translate(-50%,-50%) ou display:flex centralizado.
-    O wrapper só controla opacity + translateY, sem interferir no layout filho.
-  */
   .monsai-reveal-wrap {
     opacity: 0;
     transform: translateY(40px);
@@ -107,7 +101,6 @@ const GLOBAL_CSS = `
     transform: translateY(0);
   }
 
-  /* Feature card hover */
   .monsai-fcard {
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
     position: relative;
@@ -118,26 +111,9 @@ const GLOBAL_CSS = `
     box-shadow: 0 24px 48px -12px rgba(42,92,20,.22) !important;
   }
 
-  /* Play hover — só scale, sem translate para não conflitar */
-  .monsai-play-wrap {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .monsai-video-thumb:hover .monsai-play-wrap {
-    transform: scale(1.12);
-  }
-  .monsai-video-thumb:hover .monsai-thumb-overlay {
-    background: rgba(0,0,0,0.2) !important;
-  }
-
-  /* Social hover */
   .monsai-social { transition: background .2s, transform .2s; }
   .monsai-social:hover { background: rgba(255,255,255,.18) !important; transform: translateY(-4px); }
 
-  /* Modal */
-  .monsai-modal-backdrop { animation: monsai-backdropIn .35s ease forwards; }
-  .monsai-modal-box      { animation: monsai-modalIn .45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-
-  /* Features grid */
   .monsai-features-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -163,8 +139,6 @@ function injectGlobalCSS() {
 }
 
 // ─── Hook reveal ─────────────────────────────────────────────────────────────
-// Retorna uma ref para um <div> wrapper simples.
-// NUNCA coloque essa ref num elemento que usa position:absolute ou translate para centralizar.
 function useReveal(delayClass = "") {
   const ref = useRef(null);
   useEffect(() => {
@@ -202,7 +176,6 @@ function EcgLine({ stroke = "rgba(42,92,20,.6)" }) {
 function FeatureCard({ icon, title, description, delayClass }) {
   const ref = useReveal(delayClass);
   return (
-    // wrapper de reveal — só controla fade/slide
     <div ref={ref}>
       <div className="monsai-fcard" style={{
         height: "280px",
@@ -230,73 +203,10 @@ function FeatureCard({ icon, title, description, delayClass }) {
   );
 }
 
-// ─── Modal de vídeo ───────────────────────────────────────────────────────────
-function VideoModal({ open, onClose, videoUrl }) {
-  useEffect(() => {
-    const handleKey = (e) => { if (e.key === "Escape") onClose(); };
-    if (open) document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
-
-  const getEmbedUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("embed")) return url;
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([^&\s]+)/);
-    if (match) return `https://www.youtube.com/embed/${match[1]}?autoplay=1`;
-    return url;
-  };
-
-  return (
-    <Box className="monsai-modal-backdrop" onClick={onClose} sx={{
-      position: "fixed", inset: 0, zIndex: 1400,
-      bgcolor: "rgba(10,26,5,.88)",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      p: { xs: 2, md: 4 },
-    }}>
-      <Box className="monsai-modal-box" onClick={(e) => e.stopPropagation()} sx={{
-        position: "relative", width: "100%", maxWidth: 1000,
-        borderRadius: 4, overflow: "hidden",
-        boxShadow: "0 40px 100px rgba(0,0,0,.8)",
-        bgcolor: "#000", aspectRatio: "16/9",
-        border: "1px solid rgba(255,255,255,.1)",
-      }}>
-        <Box onClick={onClose} sx={{
-          position: "absolute", top: 16, right: 16, zIndex: 10,
-          width: 40, height: 40, borderRadius: "50%",
-          bgcolor: "rgba(0,0,0,.5)", border: "1px solid rgba(255,255,255,.2)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", transition: "all .2s",
-          "&:hover": { bgcolor: "rgba(0,0,0,.9)", transform: "scale(1.1)" },
-        }}>
-          <CloseIcon sx={{ color: "white", fontSize: "1.2rem" }} />
-        </Box>
-
-        {videoUrl ? (
-          <iframe src={getEmbedUrl(videoUrl)} title="MONSAI — Apresentação"
-            style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen />
-        ) : (
-          <Box sx={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", bgcolor: "#0a1a05" }}>
-            <Typography sx={{ color: "rgba(255,255,255,.4)", fontSize: ".9rem" }}>
-              Substitua <code style={{ color: "#7ec44f" }}>PITCH_VIDEO_URL</code> pela URL do vídeo
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </Box>
-  );
-}
-
 // ─── HOME ─────────────────────────────────────────────────────────────────────
 export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll }) {
   const [email, setEmail] = useState("");
-  const [videoOpen, setVideoOpen] = useState(false);
   const showToast = useToast();
-
-  const PITCH_VIDEO_URL = "https://youtu.be/x3YrmDOuvug";
 
   useEffect(() => { injectGlobalCSS(); }, []);
 
@@ -425,7 +335,6 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
 
       {/* ═══════════ VÍDEO / APRESENTAÇÃO ════════════════════════════════════ */}
       <Box sx={{ bgcolor: "#0a1a05", py: { xs: 10, md: 14 }, px: 2, position: "relative", overflow: "hidden" }}>
-        {/* Brilho decorativo de fundo */}
         <Box sx={{
           position: "absolute", top: "20%", left: "-8%",
           width: 600, height: 600, borderRadius: "50%",
@@ -451,108 +360,36 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
                   Entenda o problema real que nos motivou e como desenvolvemos do zero uma pulseira
                   capaz de ler batimentos, temperatura e quedas com resposta instantânea de telemetria.
                 </Typography>
-                <Button variant="outlined" onClick={() => setVideoOpen(true)}
-                  startIcon={<PlayArrowIcon />}
-                  sx={{
-                    borderColor: "#7ec44f", color: "#7ec44f", px: 3.5, py: 1.3,
-                    "&:hover": { borderColor: "#fff", color: "#fff", bgcolor: "rgba(255,255,255,.06)" },
-                  }}>
-                  Veja nossa apresentação
-                </Button>
               </div>
             </Grid>
 
-            {/* Thumbnail do vídeo
-                ─ O Grid item é só um posicionador (display:flex, centralizado).
-                ─ O Box clicável NÃO recebe nenhum ref de reveal — evita conflito de transform.
-                ─ O botão play usa position:absolute + top/left 50% + translate(-50%,-50%)
-                  isolado dentro do Box, sem interferência do reveal.           */}
-            <Grid item xs={12} md={7} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-              {/* Wrapper de reveal — só controla fade/slide, não tem position nem flex */}
-              <div ref={useReveal("d2")} style={{ width: "100%" }}>
-                <Box
-                  className="monsai-video-thumb"
-                  onClick={() => setVideoOpen(true)}
-                  sx={{
-                    position: "relative",
-                    width: "100%", maxWidth: 580,
-                    mx: "auto",                     // centraliza o maxWidth
-                    borderRadius: 4, overflow: "hidden",
-                    aspectRatio: "16/9",
-                    border: "1px solid rgba(126,196,79,.2)",
-                    cursor: "pointer",
-                    boxShadow: "0 32px 80px rgba(0,0,0,.55)",
-                    bgcolor: "#122a0c",
-                  }}
-                >
-                  {/* Fundo com ECG */}
-                  <Box sx={{ position: "absolute", inset: 0, display: "flex", alignItems: "center" }}>
-                    <EcgLine stroke="rgba(126,196,79,.3)" />
+              {/* Iframe Embutido */}
+              <Grid size={{ xs: 12, md: 5 }} sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <div ref={useReveal("d2")} style={{ width: "100%" }}>
+                  <Box
+                    sx={{
+                      position: "relative",
+                      width: "100%",
+                      maxWidth: 800,
+                      mx: "auto",
+                      borderRadius: 4,
+                      overflow: "hidden",
+                      aspectRatio: "16/9",
+                      border: "1px solid rgba(126,196,79,.2)",
+                      boxShadow: "0 32px 80px rgba(0,0,0,.55)",
+                      bgcolor: "#000",
+                    }}
+                  >
+                    <iframe
+                      src="https://www.youtube.com/embed/x3YrmDOuvug"
+                      width="100%"
+                      height="100%"
+                      title="YouTube"
+                      allowFullScreen
+                    />
                   </Box>
-
-                  {/* Grade decorativa */}
-                  <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: .06 }}
-                    viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <line key={`h${i}`} x1="0" y1={i * 50} x2="800" y2={i * 50} stroke="#7ec44f" strokeWidth=".8" />
-                    ))}
-                    {Array.from({ length: 17 }).map((_, i) => (
-                      <line key={`v${i}`} x1={i * 50} y1="0" x2={i * 50} y2="450" stroke="#7ec44f" strokeWidth=".8" />
-                    ))}
-                  </svg>
-
-                  {/* Overlay de hover */}
-                  <Box className="monsai-thumb-overlay" sx={{
-                    position: "absolute", inset: 0,
-                    bgcolor: "rgba(10,26,5,.42)",
-                    transition: "background .3s ease",
-                    zIndex: 1,
-                  }} />
-
-                  {/* Botão play — position:absolute clássico, SEM transform externo */}
-                  <Box sx={{
-                    position: "absolute",
-                    top: "50%", left: "50%",
-                    transform: "translate(-50%, -50%)",   // centralização real
-                    zIndex: 2,
-                  }}>
-                    {/* Anel de pulso (animado, não interfere no centramento) */}
-                    <Box sx={{
-                      position: "absolute",
-                      top: "50%", left: "50%",
-                      width: 90, height: 90,
-                      transform: "translate(-50%, -50%)",
-                      border: "3px solid #7ec44f",
-                      borderRadius: "50%",
-                      animation: "monsai-pulseRing 1.8s ease-out infinite",
-                      boxSizing: "border-box",
-                      pointerEvents: "none",
-                    }} />
-                    {/* Disco do play — wrapper que recebe o scale no hover */}
-                    <Box className="monsai-play-wrap" sx={{
-                      width: 80, height: 80,
-                      borderRadius: "50%",
-                      bgcolor: "#4fa825",
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      boxShadow: "0 12px 28px rgba(0,0,0,.45)",
-                    }}>
-                      <PlayArrowIcon sx={{ color: "#fff", fontSize: "3rem", ml: .5 }} />
-                    </Box>
-                  </Box>
-
-                  {/* Label canto inferior */}
-                  <Box sx={{
-                    position: "absolute", bottom: 14, left: 14, zIndex: 2,
-                    bgcolor: "rgba(0,0,0,.55)", borderRadius: 1.5,
-                    px: 1.5, py: .6, backdropFilter: "blur(4px)",
-                  }}>
-                    <Typography sx={{ color: "rgba(255,255,255,.9)", fontSize: ".75rem", fontWeight: 700, letterSpacing: .8 }}>
-                      NOSSA APRESENTAÇÃO
-                    </Typography>
-                  </Box>
-                </Box>
-              </div>
-            </Grid>
+                </div>
+              </Grid>
           </Grid>
         </Container>
       </Box>
@@ -583,10 +420,6 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
               </div>
             </Grid>
 
-            {/* Imagem do produto
-                ─ Wrapper de reveal (div puro, width:100%)
-                ─ Box interno centraliza com mx:"auto"
-                ─ Nenhum transform de layout no mesmo elemento do reveal        */}
             <Grid item xs={12} md={6}>
               <div ref={produtoImgRef} style={{ width: "100%" }}>
                 <Box sx={{
@@ -620,7 +453,6 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
 
           <Grid container spacing={6} alignItems="center">
 
-            {/* Imagem da equipe — mesmo padrão: wrapper reveal + mx:auto */}
             <Grid item xs={12} md={5}>
               <div ref={equipeImgRef} style={{ width: "100%" }}>
                 <Box sx={{
@@ -630,7 +462,7 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
                   boxShadow: "0 24px 48px -12px rgba(42,92,20,.15)",
                   lineHeight: 0,
                 }}>
-                  <Box component="img" src="equipe1.png" alt="Equipe MONSAI"
+                  <Box component="img" src={equipeImg} alt="Equipe MONSAI" // <-- Uso da variável de imagem correta aqui
                     sx={{ width: "100%", height: "auto", display: "block" }}
                   />
                 </Box>
@@ -754,8 +586,6 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
           </Box>
         </Container>
       </Box>
-
-      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} videoUrl={PITCH_VIDEO_URL} />
 
     </ThemeProvider>
   );
