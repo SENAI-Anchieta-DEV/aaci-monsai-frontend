@@ -543,7 +543,7 @@ export default function Home({ onIrParaLojinha, secaoParaRolar, resetarScroll })
                 Contato Comercial
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 3, alignItems: { xs: "center", md: "flex-start" } }}>
-                {[{ Icon: EmailIcon, text: "contato@monsai.com.br" }, { Icon: PhoneIcon, text: "(11) 3199-9999" }].map(({ Icon, text }, i) => (
+                {[{ Icon: EmailIcon, text: "contato@elvrati.com.br" }, { Icon: PhoneIcon, text: "(11) 96187-6851" }].map(({ Icon, text }, i) => (
                   <Box key={i} sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Box sx={{ width: 40, height: 40, borderRadius: 2, bgcolor: "rgba(126,196,79,.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#7ec44f" }}>
                       <Icon fontSize="small" />
