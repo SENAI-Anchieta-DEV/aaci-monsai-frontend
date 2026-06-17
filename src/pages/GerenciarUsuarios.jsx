@@ -170,8 +170,8 @@ export default function GerenciarUsuarios({ asiloId }) {
       console.log("Enviando JSON:", { senha: novaSenha });
 
       await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, {
-        senha: novaSenha
-      });
+  novaSenha: novaSenha  // era "senha: novaSenha"
+});
       
       setModalSenhaAberto(false);
       showToast({ type: "success", title: "Senha atualizada!", message: "Senha alterada com sucesso." });
