@@ -166,12 +166,20 @@ export default function GerenciarUsuarios({ asiloId }) {
       return;
     }
     try {
-      await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, { senha: novaSenha });
+      // 🚀 Adicione um log aqui para você ver exatamente o que está saindo do navegador
+      console.log("Enviando JSON:", { senha: novaSenha });
+
+      await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, {
+        senha: novaSenha
+      });
+      
       setModalSenhaAberto(false);
-      showToast({ type: "success", title: "Senha atualizada!", message: `Senha de ${usuarioSelecionado.nome} alterada com sucesso.` });
+      showToast({ type: "success", title: "Senha atualizada!", message: "Senha alterada com sucesso." });
     } catch (err) {
-      const msgErro = err.response?.data?.detail || err.response?.data?.message || "Erro interno";
-      showToast({ type: "error", title: "Erro ao atualizar senha", message: msgErro });
+      // Isso vai te mostrar a mensagem real que o backend devolveu
+      console.error("Erro completo:", err.response?.data);
+      const msgErro = err.response?.data?.message || "Erro ao atualizar a senha.";
+      showToast({ type: "error", title: "Erro", message: msgErro });
     }
   };
 
