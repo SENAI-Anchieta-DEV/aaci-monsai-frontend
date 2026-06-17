@@ -161,27 +161,25 @@ export default function GerenciarUsuarios({ asiloId }) {
   const abrirModalSenha = (usuario) => { setUsuarioSelecionado(usuario); setNovaSenha(''); setModalSenhaAberto(true); };
 
   const handleSalvarSenha = async () => {
-    if (novaSenha.length < 6) {
-      showToast({ type: "error", title: "Senha fraca", message: "A nova senha deve ter pelo menos 6 caracteres." });
-      return;
-    }
-    try {
-      // 🚀 Adicione um log aqui para você ver exatamente o que está saindo do navegador
-      console.log("Enviando JSON:", { senha: novaSenha });
+  if (novaSenha.length < 6) {
+    showToast({ type: "error", title: "Senha fraca", message: "A nova senha deve ter pelo menos 6 caracteres." });
+    return;
+  }
+  try {
+    console.log("Enviando JSON:", { novaSenha }); // corrigido
 
-      await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, {
-  novaSenha: novaSenha  // era "senha: novaSenha"
-});
-      
-      setModalSenhaAberto(false);
-      showToast({ type: "success", title: "Senha atualizada!", message: "Senha alterada com sucesso." });
-    } catch (err) {
-      // Isso vai te mostrar a mensagem real que o backend devolveu
-      console.error("Erro completo:", err.response?.data);
-      const msgErro = err.response?.data?.message || "Erro ao atualizar a senha.";
-      showToast({ type: "error", title: "Erro", message: msgErro });
-    }
-  };
+    await api.patch(`/usuarios/${resolverIdUsuario(usuarioSelecionado)}/senha`, {
+      novaSenha: novaSenha
+    });
+    
+    setModalSenhaAberto(false);
+    showToast({ type: "success", title: "Senha atualizada!", message: "Senha alterada com sucesso." });
+  } catch (err) {
+    console.error("Erro completo:", err.response?.data);
+    const msgErro = err.response?.data?.message || "Erro ao atualizar a senha.";
+    showToast({ type: "error", title: "Erro", message: msgErro });
+  }
+};
 
   const handleVincular = async () => {
     try {
